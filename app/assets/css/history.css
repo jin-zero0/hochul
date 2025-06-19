@@ -1,0 +1,250 @@
+/* 이용내역 페이지 스타일 */
+
+.header.history {
+    background-color: white;
+    color: #333;
+    justify-content: center;
+}
+
+/* 탭 메뉴 */
+.tab-menu {
+    display: flex;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+}
+
+.tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #8e8e93;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-item.active {
+    color: #ff3b30;
+    border-bottom: 2px solid #ff3b30;
+}
+
+/* 메인 컨텐츠 */
+.content.history {
+    height: calc(100% - 60px - 50px - 80px); /* 전체 높이 - 헤더 - 탭 - 하단 네비게이션 */
+    padding: 15px;
+}
+
+/* 히스토리 카드 */
+.history-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eee;
+}
+
+.history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.history-type {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+.history-type i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.history-type.emergency {
+    color: #ff3b30;
+}
+
+.history-type.reservation {
+    color: #007aff;
+}
+
+.history-status {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.history-status.completed {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.history-status.in-progress {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.history-status.cancelled {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.history-date {
+    font-size: 12px;
+    color: #8e8e93;
+    margin-bottom: 10px;
+}
+
+.history-route {
+    display: flex;
+    margin: 15px 0;
+    position: relative;
+}
+
+.history-route-line {
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    width: 1px;
+    height: calc(100% - 24px);
+    background-color: #ddd;
+    z-index: 1;
+}
+
+.history-route-points {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-right: 15px;
+    z-index: 2;
+}
+
+.history-route-point {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+}
+
+.history-route-point.start {
+    color: #ff3b30;
+    border: 2px solid #ff3b30;
+}
+
+.history-route-point.end {
+    color: #007aff;
+    border: 2px solid #007aff;
+}
+
+.history-route-point i {
+    font-size: 10px;
+}
+
+.history-route-addresses {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
+
+.history-route-address {
+    font-size: 14px;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.history-route-address.start {
+    margin-bottom: 20px;
+}
+
+.history-info {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.history-info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.history-info-label {
+    font-size: 12px;
+    color: #8e8e93;
+    margin-bottom: 4px;
+}
+
+.history-info-value {
+    font-weight: 600;
+}
+
+.history-info-value.price {
+    color: #ff3b30;
+}
+
+.history-actions {
+    display: flex;
+    margin-top: 15px;
+    gap: 10px;
+}
+
+.history-action-btn {
+    flex: 1;
+    padding: 8px 0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+}
+
+.history-action-btn.primary {
+    background-color: #f2f2f7;
+    color: #333;
+}
+
+.history-action-btn.secondary {
+    background-color: #fff;
+    color: #ff3b30;
+    border: 1px solid #ff3b30;
+}
+
+/* 빈 상태 */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #8e8e93;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #ddd;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.empty-state p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+} 

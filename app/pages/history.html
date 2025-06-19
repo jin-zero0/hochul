@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이용내역</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .mobile-container {
+            position: relative;
+            width: 411px;
+            height: 731px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* 작은 Android 화면 (360x640) 대응 */
+        @media (max-width: 411px) {
+            .mobile-container {
+                width: 360px;
+                height: 640px;
+                margin: 10px auto;
+                border-radius: 20px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+                height: 50px;
+            }
+            
+            .tab-menu {
+                padding: 10px 0;
+            }
+            
+            .tab-item {
+                padding: 12px 0;
+                font-size: 13px;
+            }
+            
+            .content {
+                height: calc(100% - 50px - 45px - 60px);
+            }
+            
+            .history-item {
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            
+            .history-date {
+                font-size: 11px;
+            }
+            
+            .history-route {
+                font-size: 13px;
+            }
+            
+            .history-price {
+                font-size: 14px;
+            }
+        }
+        
+        /* 상단 헤더 */
+        .header {
+            background-color: white;
+            color: #333;
+            padding: 15px 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #eee;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        /* 탭 메뉴 */
+        .tab-menu {
+            display: flex;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #8e8e93;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-item.active {
+            color: #ff3b30;
+            border-bottom: 2px solid #ff3b30;
+        }
+        
+        /* 메인 컨텐츠 */
+        .content {
+            height: calc(100% - 60px - 50px - 80px); /* 전체 높이 - 헤더 - 탭 - 하단 네비게이션 */
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        /* 히스토리 카드 */
+        .history-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eee;
+        }
+        
+        .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .history-type {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .history-type i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .history-type.emergency {
+            color: #ff3b30;
+        }
+        
+        .history-type.reservation {
+            color: #007aff;
+        }
+        
+        .history-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .history-status.completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .history-status.in-progress {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .history-status.cancelled {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 10px;
+        }
+        
+        .history-route {
+            display: flex;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .history-route-line {
+            position: absolute;
+            top: 12px;
+            left: 10px;
+            width: 1px;
+            height: calc(100% - 24px);
+            background-color: #ddd;
+            z-index: 1;
+        }
+        
+        .history-route-points {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-right: 15px;
+            z-index: 2;
+        }
+        
+        .history-route-point {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+        }
+        
+        .history-route-point.start {
+            color: #ff3b30;
+            border: 2px solid #ff3b30;
+        }
+        
+        .history-route-point.end {
+            color: #007aff;
+            border: 2px solid #007aff;
+        }
+        
+        .history-route-point i {
+            font-size: 10px;
+        }
+        
+        .history-route-addresses {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 1;
+        }
+        
+        .history-route-address {
+            font-size: 14px;
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .history-route-address.start {
+            margin-bottom: 20px;
+        }
+        
+        .history-info {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .history-info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .history-info-label {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-bottom: 4px;
+        }
+        
+        .history-info-value {
+            font-weight: 600;
+        }
+        
+        .history-info-value.price {
+            color: #ff3b30;
+        }
+        
+        .history-actions {
+            display: flex;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        
+        .history-action-btn {
+            flex: 1;
+            padding: 8px 0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .history-action-btn.primary {
+            background-color: #f2f2f7;
+            color: #333;
+        }
+        
+        .history-action-btn.secondary {
+            background-color: #fff;
+            color: #ff3b30;
+            border: 1px solid #ff3b30;
+        }
+        
+        /* 빈 상태 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #8e8e93;
+            text-align: center;
+            padding: 0 20px;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .empty-state p {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        /* 하단 네비게이션 */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80px;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #8e8e93;
+            font-size: 12px;
+        }
+        
+        .nav-item.active {
+            color: #ff3b30;
+        }
+        
+        .nav-item i {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- 상단 헤더 -->
+        <div class="header">
+            <h1>이용내역</h1>
+        </div>
+        
+        <!-- 탭 메뉴 -->
+        <div class="tab-menu">
+            <div class="tab-item active" data-tab="all">전체</div>
+            <div class="tab-item" data-tab="emergency">긴급 호출</div>
+            <div class="tab-item" data-tab="reservation">예약</div>
+        </div>
+        
+        <!-- 메인 컨텐츠 -->
+        <div class="content">
+            <!-- 긴급 호출 내역 -->
+            <div class="history-card">
+                <div class="history-card-header">
+                    <div class="history-type emergency">
+                        <i class="fas fa-ambulance"></i>
+                        긴급 호출
+                    </div>
+                    <div class="history-status completed">완료</div>
+                </div>
+                <div class="history-date">2023년 8월 15일 오후 2:30</div>
+                
+                <div class="history-route">
+                    <div class="history-route-line"></div>
+                    <div class="history-route-points">
+                        <div class="history-route-point start">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="history-route-point end">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                    </div>
+                    <div class="history-route-addresses">
+                        <p class="history-route-address start">서울특별시 강남구 테헤란로 123</p>
+                        <p class="history-route-address end">서울특별시 서초구 서초대로 456 서울대학교병원</p>
+                    </div>
+                </div>
+                
+                <div class="history-info">
+                    <div class="history-info-item">
+                        <span class="history-info-label">환자명</span>
+                        <span class="history-info-value">김*수</span>
+                    </div>
+                    <div class="history-info-item">
+                        <span class="history-info-label">이송 거리</span>
+                        <span class="history-info-value">8.5km</span>
+                    </div>
+                    <div class="history-info-item">
+                        <span class="history-info-label">소요 시간</span>
+                        <span class="history-info-value">25분</span>
+                    </div>
+                </div>
+                
+                <div class="history-actions">
+                    <div class="history-action-btn primary">상세 내역</div>
+                    <div class="history-action-btn secondary">재호출</div>
+                </div>
+            </div>
+            
+            <!-- 예약 내역 -->
+            <div class="history-card">
+                <div class="history-card-header">
+                    <div class="history-type reservation">
+                        <i class="far fa-calendar-alt"></i>
+                        예약
+                    </div>
+                    <div class="history-status in-progress">진행중</div>
+                </div>
+                <div class="history-date">2023년 8월 20일 오전 10:00 (예약)</div>
+                
+                <div class="history-route">
+                    <div class="history-route-line"></div>
+                    <div class="history-route-points">
+                        <div class="history-route-point start">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="history-route-point end">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                    </div>
+                    <div class="history-route-addresses">
+                        <p class="history-route-address start">서울특별시 강남구 역삼동 123-456</p>
+                        <p class="history-route-address end">서울특별시 종로구 대학로 101 서울대학교병원</p>
+                    </div>
+                </div>
+                
+                <div class="history-info">
+                    <div class="history-info-item">
+                        <span class="history-info-label">환자명</span>
+                        <span class="history-info-value">박영*</span>
+                    </div>
+                    <div class="history-info-item">
+                        <span class="history-info-label">예상 거리</span>
+                        <span class="history-info-value">12.3km</span>
+                    </div>
+                    <div class="history-info-item">
+                        <span class="history-info-label">예상 시간</span>
+                        <span class="history-info-value">35분</span>
+                    </div>
+                </div>
+                
+                <div class="history-actions">
+                    <div class="history-action-btn primary">상세 내역</div>
+                    <div class="history-action-btn secondary">예약 취소</div>
+                </div>
+            </div>
+            
+            <!-- 취소된 예약 내역 -->
+            <div class="history-card">
+                <div class="history-card-header">
+                    <div class="history-type reservation">
+                        <i class="far fa-calendar-alt"></i>
+                        예약
+                    </div>
+                    <div class="history-status cancelled">취소됨</div>
+                </div>
+                <div class="history-date">2023년 7월 5일 오후 3:00 (예약)</div>
+                
+                <div class="history-route">
+                    <div class="history-route-line"></div>
+                    <div class="history-route-points">
+                        <div class="history-route-point start">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                        <div class="history-route-point end">
+                            <i class="fas fa-circle"></i>
+                        </div>
+                    </div>
+                    <div class="history-route-addresses">
+                        <p class="history-route-address start">서울특별시 마포구 합정동 123-456</p>
+                        <p class="history-route-address end">서울특별시 서대문구 신촌동 연세대학교병원</p>
+                    </div>
+                </div>
+                
+                <div class="history-info">
+                    <div class="history-info-item">
+                        <span class="history-info-label">환자명</span>
+                        <span class="history-info-value">이*수</span>
+                    </div>
+                    <div class="history-info-item">
+                        <span class="history-info-label">취소 사유</span>
+                        <span class="history-info-value">개인 사정</span>
+                    </div>
+                </div>
+                
+                <div class="history-actions">
+                    <div class="history-action-btn primary">상세 내역</div>
+                    <div class="history-action-btn secondary">재예약</div>
+                </div>
+            </div>
+            
+            <!-- 빈 상태 (초기에는 숨김) -->
+            <div class="empty-state" style="display: none;">
+                <i class="far fa-calendar-check"></i>
+                <h3>이용내역이 없습니다</h3>
+                <p>아직 구급차 호출 또는 예약 내역이 없습니다.<br>지금 바로 서비스를 이용해보세요.</p>
+                <div class="history-action-btn secondary" style="width: 150px;">홈으로 이동</div>
+            </div>
+        </div>
+        
+        <!-- 하단 네비게이션 -->
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>홈</span>
+            </a>
+            <a href="history.html" class="nav-item active">
+                <i class="fas fa-history"></i>
+                <span>이용내역</span>
+            </a>
+            <a href="ai.html" class="nav-item">
+                <i class="fas fa-heartbeat"></i>
+                <span>응급처치</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>프로필</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 탭 전환 기능
+            const tabItems = document.querySelectorAll('.tab-item');
+            const historyCards = document.querySelectorAll('.history-card');
+            const emptyState = document.querySelector('.empty-state');
+            
+            tabItems.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 활성화된 탭 스타일 변경
+                    tabItems.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const tabType = this.getAttribute('data-tab');
+                    let hasItems = false;
+                    
+                    // 내역 필터링
+                    historyCards.forEach(card => {
+                        const cardType = card.querySelector('.history-type').classList.contains('emergency') ? 'emergency' : 'reservation';
+                        
+                        if (tabType === 'all' || tabType === cardType) {
+                            card.style.display = 'block';
+                            hasItems = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    // 빈 상태 표시
+                    emptyState.style.display = hasItems ? 'none' : 'flex';
+                });
+            });
+            
+            // 상세 내역 버튼
+            const detailBtns = document.querySelectorAll('.history-action-btn.primary');
+            detailBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('상세 내역 페이지로 이동합니다.');
+                });
+            });
+            
+            // 재호출/재예약 버튼
+            const recallBtns = document.querySelectorAll('.history-action-btn.secondary');
+            recallBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const isCancel = btn.textContent.includes('취소');
+                    if (isCancel) {
+                        if (confirm('예약을 취소하시겠습니까?')) {
+                            alert('예약이 취소되었습니다.');
+                            // 실제로는 서버에 취소 요청을 보내고 UI 업데이트
+                        }
+                    } else {
+                        const isEmergency = this.closest('.history-card').querySelector('.history-type').classList.contains('emergency');
+                        if (isEmergency) {
+                            window.location.href = 'emergency.html';
+                        } else {
+                            window.location.href = 'reservation.html';
+                        }
+                    }
+                });
+            });
+            
+            // 빈 상태의 홈으로 이동 버튼
+            const goHomeBtn = document.querySelector('.empty-state .history-action-btn');
+            goHomeBtn.addEventListener('click', function() {
+                window.location.href = 'customer-app.html';
+            });
+        });
+    </script>
+</body>
+</html> 

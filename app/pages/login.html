@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - 민간구급차 플랫폼</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #ff3b30, #ff6b5a);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .login-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .login-body {
+            padding: 40px 30px;
+        }
+        
+        .app-selection {
+            margin-bottom: 30px;
+        }
+        
+        .app-selection h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+        
+        .app-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .app-btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .app-btn:hover {
+            border-color: #ff3b30;
+            color: #ff3b30;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 59, 48, 0.2);
+        }
+        
+        .app-btn.active {
+            border-color: #ff3b30;
+            background: #ff3b30;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 59, 48, 0.3);
+        }
+        
+        .app-btn.active.driver {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .app-btn.active.admin {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .app-btn i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .kakao-login-btn {
+            width: 100%;
+            background: #FEE500;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .kakao-login-btn:hover {
+            background: #FDD835;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(254, 229, 0, 0.4);
+        }
+        
+        .kakao-login-btn:active {
+            transform: translateY(0);
+        }
+        
+        .kakao-icon {
+            width: 20px;
+            height: 20px;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwIDJDNS4wMjk0NCAyIDEgNS4xMzQwMSAxIDguODg4ODlDMSAxMS4xNzc4IDIuMjM1MjkgMTMuMjIyMiA0LjExNzY1IDE0LjQ0NDRMMy4yOTQxMiAxNy43Nzc4QzMuMjM1MjkgMTggMy40NzA1OSAxOC4yMjIyIDMuNzY0NzEgMTguMTExMUw3LjY0NzA2IDE2LjMzMzNDOC40MTE3NiAxNi41IDkuMjM1MjkgMTYuNTU1NiAxMCAxNi41NTU2QzE0Ljk3MDYgMTYuNTU1NiAxOSAxMy40MjE2IDE5IDkuNjY2NjdDMTkgNS45MTExMSAxNC45NzA2IDIgMTAgMloiIGZpbGw9IiMwMDAiLz4KPC9zdmc+');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            color: #999;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 15px;
+        }
+        
+        .terms {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            line-height: 1.5;
+        }
+        
+        .terms a {
+            color: #ff3b30;
+            text-decoration: none;
+        }
+        
+        .terms a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff3b30;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1><i class="bi bi-truck-front"></i> 민간구급차</h1>
+            <p>안전하고 빠른 응급의료 서비스</p>
+        </div>
+        
+        <div class="login-body">
+            <div class="app-selection">
+                <h3>서비스 선택</h3>
+                <div class="app-buttons">
+                    <button class="app-btn" id="customer-btn" onclick="selectApp('customer')">
+                        <i class="bi bi-person-heart"></i>
+                        고객용
+                    </button>
+                    <button class="app-btn" id="driver-btn" onclick="selectApp('driver')">
+                        <i class="bi bi-truck"></i>
+                        기사용
+                    </button>
+                    <button class="app-btn" id="admin-btn" onclick="selectApp('admin')">
+                        <i class="bi bi-gear-fill"></i>
+                        운영자
+                    </button>
+                </div>
+            </div>
+            
+            <div id="login-section" style="display: none;">
+                <button class="kakao-login-btn" onclick="loginWithKakao()">
+                    <div class="kakao-icon"></div>
+                    카카오로 간편 로그인
+                </button>
+                
+                <div class="divider">
+                    <span>또는</span>
+                </div>
+                
+                <div class="terms">
+                    로그인 시 <a href="#" onclick="showTerms()">이용약관</a> 및 
+                    <a href="#" onclick="showPrivacy()">개인정보처리방침</a>에 동의하게 됩니다.
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>로그인 중...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kakao SDK 초기화 (실제 앱키로 교체 필요)
+        Kakao.init('ae9cce23e8367af0be888d1657d525e7');
+        
+        let selectedAppType = null;
+        
+        function selectApp(appType) {
+            selectedAppType = appType;
+            
+            // 버튼 상태 업데이트
+            document.querySelectorAll('.app-btn').forEach(btn => {
+                btn.classList.remove('active', 'driver', 'admin');
+            });
+            
+            if (appType === 'customer') {
+                document.getElementById('customer-btn').classList.add('active');
+                // 로그인 섹션 표시
+                document.getElementById('login-section').style.display = 'block';
+            } else if (appType === 'driver') {
+                document.getElementById('driver-btn').classList.add('active', 'driver');
+                // 로그인 섹션 표시
+                document.getElementById('login-section').style.display = 'block';
+            } else if (appType === 'admin') {
+                document.getElementById('admin-btn').classList.add('active', 'admin');
+                // 운영자는 바로 로그인 처리
+                adminDirectLogin();
+            }
+        }
+        
+        function adminDirectLogin() {
+            // 운영자 직접 로그인 처리
+            showLoading();
+            
+            // 운영자 정보 저장
+            const adminInfo = {
+                id: 'admin_001',
+                nickname: '관리자',
+                profile_image: '',
+                email: 'admin@ambulance.com',
+                appType: 'admin',
+                loginTime: new Date().toISOString()
+            };
+            
+            localStorage.setItem('userInfo', JSON.stringify(adminInfo));
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('appType', 'admin');
+            
+            // 1초 후 관리자 페이지로 이동
+            setTimeout(() => {
+                hideLoading();
+                alert('관리자님, 환영합니다!');
+                window.location.href = 'admin.html';
+            }, 1000);
+        }
+        
+        function loginWithKakao() {
+            if (!selectedAppType) {
+                alert('먼저 서비스를 선택해주세요.');
+                return;
+            }
+            
+            // 로딩 표시
+            showLoading();
+            
+            Kakao.Auth.login({
+                success: function(authObj) {
+                    console.log('카카오 로그인 성공:', authObj);
+                    
+                    // 사용자 정보 가져오기
+                    Kakao.API.request({
+                        url: '/v2/user/me',
+                        success: function(res) {
+                            console.log('사용자 정보:', res);
+                            
+                            // 로그인 정보 저장
+                            const userInfo = {
+                                id: res.id,
+                                nickname: res.properties?.nickname || '사용자',
+                                profile_image: res.properties?.profile_image || '',
+                                email: res.kakao_account?.email || '',
+                                appType: selectedAppType,
+                                loginTime: new Date().toISOString()
+                            };
+                            
+                            localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                            localStorage.setItem('isLoggedIn', 'true');
+                            localStorage.setItem('appType', selectedAppType);
+                            
+                            // 성공 메시지 표시 후 해당 앱으로 이동
+                            setTimeout(() => {
+                                hideLoading();
+                                alert(`${userInfo.nickname}님, 환영합니다!`);
+                                
+                                if (selectedAppType === 'customer') {
+                                    window.location.href = 'home.html';
+                                } else if (selectedAppType === 'driver') {
+                                    window.location.href = 'driver.html';
+                                }
+                            }, 1000);
+                        },
+                        fail: function(error) {
+                            console.error('사용자 정보 가져오기 실패:', error);
+                            hideLoading();
+                            alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+                        }
+                    });
+                },
+                fail: function(err) {
+                    console.error('카카오 로그인 실패:', err);
+                    hideLoading();
+                    alert('로그인에 실패했습니다. 다시 시도해주세요.');
+                }
+            });
+        }
+        
+        function showLoading() {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('login-section').style.display = 'block';
+        }
+        
+        function showTerms() {
+            alert('이용약관 페이지로 이동합니다.');
+            // 실제로는 이용약관 페이지로 이동하거나 모달을 표시
+        }
+        
+        function showPrivacy() {
+            alert('개인정보처리방침 페이지로 이동합니다.');
+            // 실제로는 개인정보처리방침 페이지로 이동하거나 모달을 표시
+        }
+        
+        // 페이지 로드 시 이미 로그인된 상태인지 확인
+        window.onload = function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const appType = localStorage.getItem('appType');
+            
+            if (isLoggedIn === 'true' && appType) {
+                // 이미 로그인된 상태라면 해당 앱으로 자동 이동
+                if (appType === 'customer') {
+                    window.location.href = 'home.html';
+                } else if (appType === 'driver') {
+                    window.location.href = 'driver.html';
+                } else if (appType === 'admin') {
+                    window.location.href = 'admin.html';
+                }
+            }
+        };
+    </script>
+</body>
+</html> 

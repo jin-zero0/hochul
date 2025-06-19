@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>응급처치 가이드</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .content {
+            padding: 20px;
+            height: calc(100% - 60px - 80px);
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+
+        .emergency-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .emergency-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .emergency-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .emergency-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .emergency-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .emergency-desc {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* 응급 상황별 아이콘 색상 */
+        .icon-red { background-color: #ffebee; color: #ff3b30; }
+        .icon-blue { background-color: #e3f2fd; color: #007aff; }
+        .icon-green { background-color: #e8f5e9; color: #34c759; }
+        .icon-orange { background-color: #fff3e0; color: #ff9500; }
+        .icon-purple { background-color: #f3e5f5; color: #9c27b0; }
+        .icon-yellow { background-color: #fffde7; color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- 상단 헤더 -->
+        <div class="header">
+            <h1>응급처치 가이드</h1>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="content">
+            <div class="emergency-grid">
+                <a href="emergency-cpr.html" class="emergency-card">
+                    <div class="emergency-icon icon-red">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="emergency-title">심장마비 (CPR)</div>
+                    <div class="emergency-desc">심장마비 발생 시 즉시 시행해야 할 응급처치</div>
+                </a>
+
+                <a href="emergency-choking.html" class="emergency-card">
+                    <div class="emergency-icon icon-blue">
+                        <i class="fas fa-lungs"></i>
+                    </div>
+                    <div class="emergency-title">기도폐쇄</div>
+                    <div class="emergency-desc">이물질에 의한 질식 시 응급처치</div>
+                </a>
+
+                <a href="emergency-bleeding.html" class="emergency-card">
+                    <div class="emergency-icon icon-red">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="emergency-title">출혈</div>
+                    <div class="emergency-desc">심한 출혈 시 지혈 방법</div>
+                </a>
+
+                <a href="emergency-burn.html" class="emergency-card">
+                    <div class="emergency-icon icon-orange">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="emergency-title">화상</div>
+                    <div class="emergency-desc">화상 응급처치 방법</div>
+                </a>
+
+                <a href="emergency-fracture.html" class="emergency-card">
+                    <div class="emergency-icon icon-purple">
+                        <i class="fas fa-bone"></i>
+                    </div>
+                    <div class="emergency-title">골절</div>
+                    <div class="emergency-desc">골절 시 응급처치 방법</div>
+                </a>
+
+                <a href="emergency-heat.html" class="emergency-card">
+                    <div class="emergency-icon icon-yellow">
+                        <i class="fas fa-sun"></i>
+                    </div>
+                    <div class="emergency-title">열사병/일사병</div>
+                    <div class="emergency-desc">고온 환경에서의 응급처치</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 하단 네비게이션 -->
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>홈</span>
+            </a>
+            <a href="history.html" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>이용내역</span>
+            </a>
+            <a href="ai.html" class="nav-item active">
+                <i class="fas fa-heartbeat"></i>
+                <span>응급처치</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>프로필</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html> 

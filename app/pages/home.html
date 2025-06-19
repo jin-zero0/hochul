@@ -1,0 +1,2678 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민간구급차 실시간 배차/호출 플랫폼</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Kakao Map API -->
+    <script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ae9cce23e8367af0be888d1657d525e7"></script>
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <!-- Auth Manager -->
+    <!-- <script src="../assets/js/auth.js"></script> -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            position: relative;
+            width: 411px;
+            height: 731px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff3b30, #ff6b5a);
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(255, 59, 48, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .user-profile {
+            font-size: 0.9rem;
+        }
+        
+        .help-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        
+        .help-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .map-container {
+            background-color: white;
+            border-radius: 15px;
+            margin: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+            height: 160px;
+            position: relative;
+        }
+        
+        #map {
+            width: 100%;
+            height: 160px;
+            border-radius: 15px;
+        }
+        
+        .location-pin {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff3b30;
+            font-size: 32px;
+            z-index: 2;
+            pointer-events: none;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .action-buttons-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 12px;
+            margin: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 16px 18px;
+            border: none;
+            border-radius: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .emergency-btn {
+            background: linear-gradient(135deg, #ff3b30, #ff6b5a);
+            color: white;
+        }
+        
+        .emergency-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 59, 48, 0.4);
+        }
+        
+        .reservation-btn {
+            background: linear-gradient(135deg, #007aff, #4da6ff);
+            color: white;
+        }
+        
+        .reservation-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 122, 255, 0.4);
+        }
+        
+        .hospital-btn {
+            background: linear-gradient(135deg, #34c759, #5ed75e);
+            color: white;
+        }
+        
+        .hospital-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(52, 199, 89, 0.4);
+        }
+        
+        .action-btn i {
+            font-size: 18px;
+        }
+        
+        .location-search-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 16px;
+            margin: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .location-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        
+        .location-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        
+        .start-icon {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .end-icon {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .location-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        
+        .location-input {
+            width: 100%;
+            padding: 14px 36px 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .location-input:focus {
+            outline: none;
+            border-color: #ff3b30;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1), 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .location-input::placeholder {
+            color: #999;
+            font-weight: 400;
+        }
+        
+        .clear-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .clear-icon:hover {
+            color: #ff3b30;
+        }
+        
+        .route-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 10px 0;
+            padding-left: 45px;
+        }
+        
+        .route-line {
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, #4caf50, #f44336);
+            margin-right: 15px;
+        }
+        
+        .swap-btn {
+            background-color: #fff;
+            border: 2px solid #f0f0f0;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+        }
+        
+        .swap-btn:hover {
+            border-color: #ff3b30;
+            color: #ff3b30;
+            transform: rotate(180deg);
+        }
+        
+        .location-search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: #fff;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            z-index: 20;
+            display: none;
+            border: 1px solid #f0f0f0;
+            border-top: none;
+        }
+        
+        .location-result-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .location-result-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .location-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .location-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .location-address {
+            font-size: 12px;
+            color: #666;
+        }
+        
+
+        
+        .ad-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 12px;
+            margin: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .ad-slider {
+            position: relative;
+            overflow: hidden;
+            height: 70px;
+        }
+        
+        .ad-banner {
+            width: 100%;
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .ad-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+        
+        .ad-slide:first-child {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .ad-slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .ad-slide.prev {
+            transform: translateX(-100%);
+        }
+        
+        .ad-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        
+        .ad-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .ad-indicator.active {
+            background-color: #ff3b30;
+            transform: scale(1.2);
+        }
+        
+        .ad-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .ad-content {
+            flex: 1;
+        }
+        
+        .ad-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        
+        .ad-description {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .ad-button {
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .ad-button:hover {
+            transform: translateY(-1px);
+        }
+        
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 6px 0;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            border-top: 1px solid #f0f0f0;
+            height: 70px;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        
+        .nav-item.active {
+            color: #ff3b30;
+            background-color: rgba(255, 59, 48, 0.1);
+        }
+        
+        .nav-item i {
+            font-size: 1.3rem;
+            margin-bottom: 3px;
+        }
+        
+        /* 메인 콘텐츠 영역 높이 조정 */
+        .app-container > *:not(.bottom-nav) {
+            margin-bottom: 0;
+        }
+        
+        .app-container {
+            padding-bottom: 70px; /* 하단 네비게이션 높이만큼 패딩 추가 */
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 411px) {
+            .app-container {
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .action-btn {
+                padding: 15px;
+            }
+        }
+        
+        /* 작은 Android 화면 (360x640) 대응 */
+        @media (max-width: 360px) {
+            .app-container {
+                width: 360px;
+                height: 640px;
+                margin: 10px auto;
+                border-radius: 15px;
+            }
+            
+            .map-container {
+                height: 140px;
+                margin: 8px;
+            }
+            
+            .ad-slider {
+                height: 60px;
+            }
+            
+            .action-btn {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+            
+            .header {
+                padding: 12px 16px;
+            }
+            
+            .location-search-card, .action-buttons-card, .ad-container {
+                margin: 8px;
+                padding: 10px;
+            }
+            
+            .bottom-nav {
+                height: 60px;
+            }
+            
+            .nav-item {
+                font-size: 0.65rem;
+            }
+            
+            .nav-item i {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* 애니메이션 효과 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .ad-container, .map-container, .location-search-card, .action-buttons-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .ad-container {
+            animation-delay: 0.1s;
+        }
+        
+        .map-container {
+            animation-delay: 0.2s;
+        }
+        
+        .location-search-card {
+            animation-delay: 0.3s;
+        }
+        
+        .action-buttons-card {
+            animation-delay: 0.4s;
+        }
+        
+        /* 검색 모달 스타일 */
+        .search-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #fff;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .search-modal-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            background-color: #fff;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #333;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 15px;
+        }
+        
+        .search-modal-title {
+            flex: 1;
+        }
+        
+        .search-type-indicator {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .search-type-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .search-type-dot.start {
+            background-color: #4caf50;
+        }
+        
+        .search-type-dot.end {
+            background-color: #f44336;
+        }
+        
+        .search-modal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+        
+        .current-location-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .current-location-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .location-icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007aff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+            font-size: 16px;
+        }
+        
+        .location-info {
+            flex: 1;
+        }
+        
+        .location-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .location-address {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .search-input-container {
+            position: relative;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .search-field-group {
+            margin-bottom: 15px;
+        }
+        
+        .search-field-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .search-field-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            padding-left: 2px;
+        }
+        
+        .search-field-wrapper {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            font-size: 15px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #007aff;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        .search-clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .search-clear-btn:hover {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            padding: 20px 20px 10px 20px;
+            margin: 0;
+        }
+        
+        .recent-section, .recommended-section {
+            margin-bottom: 20px;
+        }
+        
+        .recent-list, .recommended-list, .search-results {
+            padding: 0;
+        }
+        
+        .location-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .location-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .location-item:last-child {
+            border-bottom: none;
+        }
+        
+        .location-item .location-icon-wrapper {
+            width: 35px;
+            height: 35px;
+            background-color: #f0f0f0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .location-item .location-name {
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        
+        .location-item .location-address {
+            font-size: 13px;
+        }
+        
+        .recent-item {
+            position: relative;
+        }
+        
+        .recent-item .delete-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .recent-item .delete-btn:hover {
+            color: #999;
+        }
+        
+        /* 병원 모달 스타일 */
+        .hospital-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .hospital-modal-content {
+            background-color: white;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hospital-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .hospital-modal-header h5 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #666;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .close-btn:hover {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .hospital-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .hospital-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        
+        .hospital-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .hospital-item:last-child {
+            border-bottom: none;
+        }
+        
+        .hospital-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34c759, #5ed75e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .hospital-info {
+            flex: 1;
+        }
+        
+        .hospital-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .hospital-address {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+        
+        .hospital-distance {
+            font-size: 13px;
+            color: #34c759;
+            font-weight: 500;
+        }
+        
+        .hospital-action {
+            color: #ccc;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        /* 요금 안내 모달 스타일 */
+        .help-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        
+        .help-modal-content {
+            background-color: white;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .help-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            background: linear-gradient(135deg, #ff3b30, #ff6b5a);
+            color: white;
+        }
+        
+        .help-modal-header h5 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .help-modal-header .close-btn {
+            color: white;
+        }
+        
+        .help-modal-header .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .help-content {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .help-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .help-step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff3b30, #ff6b5a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .step-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .help-tip {
+            background-color: #f8f9fa;
+            border-left: 4px solid #ff3b30;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .help-tip-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff3b30;
+            margin-bottom: 5px;
+        }
+        
+        .help-tip-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 상단 헤더 -->
+        <div class="header">
+            <h1>민간구급차 호출 서비스</h1>
+            <div style="display: flex; align-items: center;">
+                <div id="user-profile-container"></div>
+                <button class="help-icon" id="operatorToggleBtn" title="운영자 모드 토글" style="margin-right: 8px;">
+                    <i class="fas fa-user-cog"></i>
+                </button>
+                <button class="help-icon" id="helpBtn" title="요금 안내">
+                    <i class="fas fa-question"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 광고 영역 - 상단바 아래로 이동 -->
+        <div class="ad-container">
+            <div class="ad-slider">
+                <!-- 광고 1: 호출이 앱 -->
+                <div class="ad-banner ad-slide active">
+                    <div class="ad-icon" style="background: linear-gradient(135deg, #ff3b30, #ff6b5a);">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <div class="ad-content">
+                        <div class="ad-title">호출이</div>
+                        <div class="ad-description">24시간 민간구급차 배차 서비스</div>
+                    </div>
+                    <button class="ad-button" style="background: linear-gradient(135deg, #007aff, #4da6ff);">앱 설치</button>
+                </div>
+                
+                <!-- 광고 2: 응급처치 교육 -->
+                <div class="ad-banner ad-slide">
+                    <div class="ad-icon" style="background: linear-gradient(135deg, #34c759, #5ed75e);">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="ad-content">
+                        <div class="ad-title">응급처치 교육</div>
+                        <div class="ad-description">지금 등록하면 20% 할인!</div>
+                    </div>
+                    <button class="ad-button" style="background: linear-gradient(135deg, #34c759, #5ed75e);">자세히 보기</button>
+                </div>
+                
+                <!-- 광고 3: 보험 서비스 -->
+                <div class="ad-banner ad-slide">
+                    <div class="ad-icon" style="background: linear-gradient(135deg, #5ac8fa, #7dd3fc);">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="ad-content">
+                        <div class="ad-title">응급 의료 보험</div>
+                        <div class="ad-description">월 10,000원으로 안심 응급 서비스</div>
+                    </div>
+                    <button class="ad-button" style="background: linear-gradient(135deg, #5856d6, #7c7ce0);">가입하기</button>
+                </div>
+                
+                <!-- 광고 4: 헬스케어 앱 -->
+                <div class="ad-banner ad-slide">
+                    <div class="ad-icon" style="background: linear-gradient(135deg, #ff9500, #ffb340);">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="ad-content">
+                        <div class="ad-title">건강관리 앱</div>
+                        <div class="ad-description">건강 데이터 분석 및 응급상황 알림</div>
+                    </div>
+                    <button class="ad-button" style="background: linear-gradient(135deg, #ff9500, #ffb340);">다운로드</button>
+                </div>
+            </div>
+            
+            <!-- 광고 슬라이더 인디케이터 -->
+            <div class="ad-indicators">
+                <span class="ad-indicator active"></span>
+                <span class="ad-indicator"></span>
+                <span class="ad-indicator"></span>
+                <span class="ad-indicator"></span>
+            </div>
+        </div>
+        
+        <!-- 지도 영역 -->
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="location-pin" style="display: none;">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+        </div>
+        
+        <!-- 출발지/도착지 검색 카드 -->
+        <div class="location-search-card">
+            <!-- 출발지 검색 -->
+            <div class="location-input-group">
+                <div class="location-icon start-icon">
+                    <i class="fas fa-circle"></i>
+                </div>
+                <div class="location-input-wrapper">
+                    <input type="text" class="location-input" id="startLocationInput" placeholder="출발지 - 병원명 병실호수 / 주소지" readonly>
+                    <i class="fas fa-times clear-icon" id="clearStartBtn" style="display: none;"></i>
+                </div>
+            </div>
+            
+            <!-- 연결선 -->
+            <div class="route-connector">
+                <div class="route-line"></div>
+                <button class="swap-btn" id="swapLocationsBtn" title="출발지와 도착지 바꾸기">
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+            </div>
+            
+            <!-- 도착지 검색 -->
+            <div class="location-input-group">
+                <div class="location-icon end-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="location-input-wrapper">
+                    <input type="text" class="location-input" id="endLocationInput" placeholder="도착지 - 병원명 / 자택-주소" readonly>
+                    <i class="fas fa-times clear-icon" id="clearEndBtn" style="display: none;"></i>
+                </div>
+            </div>
+            
+
+        </div>
+        
+        <!-- 검색 모달 -->
+        <div class="search-modal" id="searchModal" style="display: none;">
+            <div class="search-modal-header">
+                <button class="back-btn" id="backBtn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="search-modal-title">
+                    <div class="search-type-indicator">
+                        <span class="search-type-dot" id="searchTypeDot"></span>
+                        <span id="searchTypeText">출발지 검색</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="search-modal-content">
+                <!-- 현재 위치 -->
+                <div class="current-location-item" id="currentLocationItem">
+                    <div class="location-icon-wrapper">
+                        <i class="fas fa-crosshairs"></i>
+                    </div>
+                    <div class="location-info">
+                        <div class="location-name">현재 위치</div>
+                        <div class="location-address" id="currentLocationAddress">위치를 가져오는 중...</div>
+                    </div>
+                </div>
+                
+                <!-- 검색 입력 -->
+                <div class="search-input-container">
+                    <!-- 병원명 검색 -->
+                    <div class="search-field-group">
+                        <label class="search-field-label">병원명</label>
+                        <div class="search-field-wrapper">
+                            <input type="text" class="search-input hospital-input" id="hospitalInput" placeholder="병원명을 입력하세요">
+                            <button class="search-clear-btn" id="hospitalClearBtn" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 병실호수 입력 -->
+                    <div class="search-field-group">
+                        <label class="search-field-label">병실호수</label>
+                        <div class="search-field-wrapper">
+                            <input type="text" class="search-input room-input" id="roomInput" placeholder="병실호수를 입력하세요 (예: 101호)">
+                            <button class="search-clear-btn" id="roomClearBtn" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 주소지 검색 -->
+                    <div class="search-field-group">
+                        <label class="search-field-label">주소지</label>
+                        <div class="search-field-wrapper">
+                            <input type="text" class="search-input address-input" id="addressInput" placeholder="주소지를 입력하세요">
+                            <button class="search-clear-btn" id="addressClearBtn" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 통합 검색 (기존 방식도 유지) -->
+                    <div class="search-field-group">
+                        <label class="search-field-label">통합 검색</label>
+                        <div class="search-field-wrapper">
+                            <input type="text" class="search-input unified-input" id="unifiedInput" placeholder="장소명을 입력하세요">
+                            <button class="search-clear-btn" id="unifiedClearBtn" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 최근 검색 -->
+                <div class="recent-section">
+                    <div class="section-title">최근 검색</div>
+                    <div class="recent-list" id="recentList">
+                        <!-- 최근 검색 항목들이 여기에 추가됩니다 -->
+                    </div>
+                </div>
+                
+                <!-- 검색 결과 -->
+                <div class="search-results" id="searchResults" style="display: none;">
+                    <!-- 검색 결과가 여기에 표시됩니다 -->
+                </div>
+                
+                <!-- 추천 장소 -->
+                <div class="recommended-section">
+                    <div class="section-title">추천 장소</div>
+                    <div class="recommended-list" id="recommendedList">
+                        <!-- 추천 장소들이 여기에 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 액션 버튼 카드 -->
+        <div class="action-buttons-card">
+            <div class="action-buttons">
+                <button class="action-btn emergency-btn" id="emergencyBtn">
+                    <i class="fas fa-ambulance"></i>
+                    응급 호출
+                </button>
+                <button class="action-btn reservation-btn" id="reservationBtn">
+                    <i class="far fa-calendar-alt"></i>
+                    예약 호출
+                </button>
+            </div>
+        </div>
+        
+        <!-- 요금 안내 모달 -->
+        <div class="help-modal" id="helpModal" style="display: none;">
+            <div class="help-modal-content">
+                <div class="help-modal-header">
+                    <h5>요금 안내</h5>
+                    <button class="close-btn" id="helpCloseBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="help-content">
+                    <div class="help-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">출발지와 도착지 설정</div>
+                            <div class="step-description">출발지와 도착지 입력창을 클릭하여 위치를 검색하고 선택하세요. 현재 위치를 출발지로 자동 설정할 수 있습니다.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="help-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">호출 방식 선택</div>
+                            <div class="step-description">응급 호출 또는 예약 호출 중 상황에 맞는 방식을 선택하세요. 응급 상황에서는 즉시 호출을 이용하세요.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="help-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">구급차 배차 확인</div>
+                            <div class="step-description">호출 후 가장 가까운 민간구급차가 배차됩니다. 실시간으로 구급차 위치와 도착 예정 시간을 확인할 수 있습니다.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="help-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-title">요금 안내</div>
+                            <div class="step-description">
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #ff3b30; font-size: 16px;">일반 구급차</strong><br>
+                                    <span style="color: #007aff; font-weight: 600;">기본요금 ₩50,000</span> (기본 운행거리 10km 이내 관할지역)<br>
+                                    • 동승 의료진 없음<br>
+                                    • 단순 거동 불편 및 비응급환자 이송<br>
+                                    • 기본 이용거리 초과거리 이용요금 별도 협의
+                                </div>
+                                <div>
+                                    <strong style="color: #ff3b30; font-size: 16px;">특수구급차</strong><br>
+                                    <span style="color: #007aff; font-weight: 600;">기본요금 ₩75,000</span> (기본 운행거리 10km 이내 관할지역)<br>
+                                    • 의료진 동승, 중증환자 및 응급환자 이송<br>
+                                    • 기본 이용거리 초과거리 이용요금 별도 협의
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="help-tip">
+                        <div class="help-tip-title">💡 이용 팁</div>
+                        <div class="help-tip-text">
+                            • 응급상황 시 119 신고 후 민간구급차를 이용하세요<br>
+                            • 예약 호출은 최대 24시간 전까지 가능합니다<br>
+                            • 응급처치 메뉴에서 기본 응급처치법을 확인하세요
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 하단 네비게이션 -->
+        <div class="bottom-nav">
+            <a href="main.html" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>홈</span>
+            </a>
+            <a href="history.html" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>이용내역</span>
+            </a>
+            <a href="ai.html" class="nav-item">
+                <i class="fas fa-heartbeat"></i>
+                <span>응급처치</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>프로필</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Kakao Map API 체크 함수
+        function checkKakaoMapAPI() {
+            return new Promise((resolve, reject) => {
+                if (window.kakao && window.kakao.maps) {
+                    resolve();
+                } else {
+                    // 스크립트가 로드될 때까지 잠시 대기
+                    setTimeout(() => {
+                        if (window.kakao && window.kakao.maps) {
+                            resolve();
+                        } else {
+                            reject(new Error('Kakao Maps API not available'));
+                        }
+                    }, 1000);
+                }
+            });
+        }
+        
+        // 목업 지도 초기화 함수
+        function initMockMap() {
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
+            
+            // 목업 지도 스타일 설정
+            mapContainer.innerHTML = '';
+            mapContainer.style.background = `
+                linear-gradient(45deg, #e8f5e8 25%, transparent 25%), 
+                linear-gradient(-45deg, #e8f5e8 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #e8f5e8 75%), 
+                linear-gradient(-45deg, transparent 75%, #e8f5e8 75%)
+            `;
+            mapContainer.style.backgroundSize = '20px 20px';
+            mapContainer.style.backgroundPosition = '0 0, 0 10px, 10px -10px, -10px 0px';
+            mapContainer.style.backgroundColor = '#f0f8f0';
+            mapContainer.style.position = 'relative';
+            mapContainer.style.display = 'block';
+            
+            // 도로 라인 추가
+            const roadLines = document.createElement('div');
+            roadLines.innerHTML = `
+                <div style="position: absolute; top: 30%; left: 0; width: 100%; height: 3px; background: #ddd; transform: rotate(15deg);"></div>
+                <div style="position: absolute; top: 60%; left: 0; width: 100%; height: 3px; background: #ddd; transform: rotate(-10deg);"></div>
+                <div style="position: absolute; top: 20%; left: 30%; width: 3px; height: 100%; background: #ddd; transform: rotate(20deg);"></div>
+                <div style="position: absolute; top: 0; left: 70%; width: 3px; height: 100%; background: #ddd; transform: rotate(-15deg);"></div>
+            `;
+            mapContainer.appendChild(roadLines);
+            
+            // 건물 표시
+            const buildings = document.createElement('div');
+            buildings.innerHTML = `
+                <div style="position: absolute; top: 20%; left: 15%; width: 12px; height: 12px; background: #ff6b6b; border-radius: 2px;"></div>
+                <div style="position: absolute; top: 40%; left: 25%; width: 10px; height: 10px; background: #4ecdc4; border-radius: 2px;"></div>
+                <div style="position: absolute; top: 65%; left: 60%; width: 14px; height: 14px; background: #45b7d1; border-radius: 2px;"></div>
+                <div style="position: absolute; top: 30%; left: 75%; width: 8px; height: 8px; background: #f9ca24; border-radius: 2px;"></div>
+                <div style="position: absolute; top: 70%; left: 20%; width: 11px; height: 11px; background: #6c5ce7; border-radius: 2px;"></div>
+            `;
+            mapContainer.appendChild(buildings);
+            
+            // 현재 위치 마커
+            const currentMarker = document.createElement('div');
+            currentMarker.innerHTML = `
+                <div style="position: absolute; top: 45%; left: 45%; width: 20px; height: 20px; background: #ff3b30; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+            `;
+            mapContainer.appendChild(currentMarker);
+            
+            // 지도 클릭 이벤트 (목업용)
+            mapContainer.addEventListener('click', function(e) {
+                const rect = mapContainer.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width * 100);
+                const y = ((e.clientY - rect.top) / rect.height * 100);
+                
+                // 기존 클릭 마커 제거
+                const existingClickMarker = mapContainer.querySelector('.click-marker');
+                if (existingClickMarker) {
+                    existingClickMarker.remove();
+                }
+                
+                // 새 클릭 마커 추가
+                const clickMarker = document.createElement('div');
+                clickMarker.className = 'click-marker';
+                clickMarker.innerHTML = `
+                    <div style="position: absolute; top: ${y}%; left: ${x}%; width: 16px; height: 16px; background: #007aff; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transform: translate(-50%, -50%); animation: pulse 1s ease-in-out;"></div>
+                `;
+                mapContainer.appendChild(clickMarker);
+                
+                console.log(`지도 클릭: ${x.toFixed(1)}%, ${y.toFixed(1)}%`);
+            });
+            
+            // 펄스 애니메이션 CSS 추가
+            if (!document.querySelector('#pulse-animation')) {
+                const style = document.createElement('style');
+                style.id = 'pulse-animation';
+                style.textContent = `
+                    @keyframes pulse {
+                        0% { transform: translate(-50%, -50%) scale(1); }
+                        50% { transform: translate(-50%, -50%) scale(1.2); }
+                        100% { transform: translate(-50%, -50%) scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            console.log('목업 지도 초기화 완료');
+        }
+        
+        // 지도 초기화 함수
+        function initializeMap() {
+            var mapContainer = document.getElementById('map');
+            
+            // 목업 지도 스타일 제거
+            mapContainer.innerHTML = '';
+            mapContainer.style.background = '';
+            mapContainer.style.backgroundSize = '';
+            mapContainer.style.backgroundPosition = '';
+            mapContainer.style.backgroundColor = '';
+            mapContainer.style.display = '';
+            mapContainer.style.alignItems = '';
+            mapContainer.style.justifyContent = '';
+            
+            var mapOption = {
+                center: new kakao.maps.LatLng(37.566826, 126.978656), // 서울시청 좌표
+                level: 3 // 지도의 확대 레벨
+            };
+
+            // 지도 생성
+            var map = new kakao.maps.Map(mapContainer, mapOption);
+            
+            // 현재 위치 마커 추가
+            var marker = new kakao.maps.Marker({
+                position: new kakao.maps.LatLng(37.566826, 126.978656),
+                map: map
+            });
+            
+            console.log('실제 카카오 지도 초기화 완료');
+            return map;
+        }
+        
+        // 전역 변수
+        var map;
+        
+        // 더미 장소 데이터 (실제 서비스에서는 Kakao Places API 사용)
+        const dummyPlaces = [
+            { name: '서울역', address: '서울특별시 중구 세종대로 2', lat: 37.5547, lng: 126.9706 },
+            { name: '강남역', address: '서울특별시 강남구 강남대로 396', lat: 37.4979, lng: 127.0276 },
+            { name: '홍대입구역', address: '서울특별시 마포구 양화로 160', lat: 37.5563, lng: 126.9236 },
+            { name: '명동역', address: '서울특별시 중구 명동2가 25-36', lat: 37.5636, lng: 126.9834 },
+            { name: '이태원역', address: '서울특별시 용산구 이태원로 177', lat: 37.5345, lng: 126.9945 },
+            { name: '신촌역', address: '서울특별시 서대문구 신촌로 120', lat: 37.5556, lng: 126.9364 },
+            { name: '잠실역', address: '서울특별시 송파구 올림픽로 지하 265', lat: 37.5133, lng: 127.1000 },
+            { name: '건대입구역', address: '서울특별시 광진구 능동로 110', lat: 37.5401, lng: 127.0695 },
+            { name: '사당역', address: '서울특별시 동작구 사당로 지하 272', lat: 37.4766, lng: 126.9816 },
+            { name: '종로3가역', address: '서울특별시 종로구 종로 지하 99', lat: 37.5703, lng: 126.9911 },
+            { name: '동대문역', address: '서울특별시 중구 청계천로 428', lat: 37.5714, lng: 127.0098 },
+            { name: '을지로입구역', address: '서울특별시 중구 을지로 지하 199', lat: 37.5663, lng: 126.9820 },
+            { name: '시청역', address: '서울특별시 중구 세종대로 지하 110', lat: 37.5657, lng: 126.9769 },
+            { name: '광화문역', address: '서울특별시 종로구 세종로 지하 172', lat: 37.5720, lng: 126.9762 },
+            { name: '여의도역', address: '서울특별시 영등포구 의사당대로 지하 83', lat: 37.5219, lng: 126.9245 }
+        ];
+        
+        // 병원 데이터 (병실 정보 포함)
+        const hospitalData = [
+            { name: '서울대학교병원', address: '서울특별시 종로구 대학로 101', lat: 37.5799, lng: 126.9988, type: '종합병원', rooms: ['101호', '102호', '201호', '301호', '401호', '501호'] },
+            { name: '삼성서울병원', address: '서울특별시 강남구 일원로 81', lat: 37.4881, lng: 127.0856, type: '종합병원', rooms: ['A101호', 'A201호', 'B101호', 'B201호', 'C101호', 'C201호'] },
+            { name: '서울아산병원', address: '서울특별시 송파구 올림픽로43길 88', lat: 37.5262, lng: 127.1085, type: '종합병원', rooms: ['1001호', '1002호', '2001호', '2002호', '3001호', '3002호'] },
+            { name: '세브란스병원', address: '서울특별시 서대문구 연세로 50-1', lat: 37.5626, lng: 126.9397, type: '종합병원', rooms: ['VIP101호', 'VIP201호', '일반101호', '일반201호', '특실101호', '특실201호'] },
+            { name: '서울성모병원', address: '서울특별시 서초구 반포대로 222', lat: 37.5017, lng: 126.9967, type: '종합병원', rooms: ['301호', '302호', '401호', '402호', '501호', '502호'] },
+            { name: '강남세브란스병원', address: '서울특별시 강남구 언주로 211', lat: 37.5194, lng: 127.0473, type: '종합병원', rooms: ['G101호', 'G201호', 'H101호', 'H201호', 'I101호', 'I201호'] },
+            { name: '고려대학교의료원', address: '서울특별시 성북구 고려대로 73', lat: 37.5906, lng: 127.0266, type: '종합병원', rooms: ['동관101호', '동관201호', '서관101호', '서관201호', '남관101호', '남관201호'] },
+            { name: '한양대학교병원', address: '서울특별시 성동구 왕십리로 222', lat: 37.5586, lng: 127.0438, type: '종합병원', rooms: ['1층101호', '2층201호', '3층301호', '4층401호', '5층501호', '6층601호'] },
+            { name: '중앙대학교병원', address: '서울특별시 동작구 흑석로 102', lat: 37.5086, lng: 126.9575, type: '종합병원', rooms: ['A동101호', 'A동201호', 'B동101호', 'B동201호', 'C동101호', 'C동201호'] },
+            { name: '경희대학교병원', address: '서울특별시 동대문구 경희대로 23', lat: 37.5943, lng: 127.0518, type: '종합병원', rooms: ['본관101호', '본관201호', '신관101호', '신관201호', '별관101호', '별관201호'] },
+            { name: '이대목동병원', address: '서울특별시 양천구 안양천로 1071', lat: 37.5264, lng: 126.8747, type: '종합병원', rooms: ['1병동101호', '1병동201호', '2병동101호', '2병동201호', '3병동101호', '3병동201호'] },
+            { name: '보라매병원', address: '서울특별시 동작구 보라매로5길 20', lat: 37.4938, lng: 126.9244, type: '종합병원', rooms: ['내과병동101호', '내과병동201호', '외과병동101호', '외과병동201호', '응급실', 'ICU'] },
+            { name: '국립중앙의료원', address: '서울특별시 중구 을지로 245', lat: 37.5636, lng: 127.0016, type: '종합병원', rooms: ['1호실', '2호실', '3호실', '4호실', '5호실', '6호실'] },
+            { name: '서울적십자병원', address: '서울특별시 종로구 새문안로 9', lat: 37.5703, lng: 126.9711, type: '종합병원', rooms: ['적십자101호', '적십자201호', '적십자301호', '적십자401호', '적십자501호', '적십자601호'] },
+            { name: '강북삼성병원', address: '서울특별시 종로구 새문안로 29', lat: 37.5714, lng: 126.9692, type: '종합병원', rooms: ['삼성101호', '삼성201호', '삼성301호', '삼성401호', '삼성501호', '삼성601호'] }
+        ];
+        
+        // 자택 및 기타 장소 데이터
+        const homeData = [
+            { name: '자택', address: '서울특별시 강남구 테헤란로 123', lat: 37.5010, lng: 127.0396, type: '자택' },
+            { name: '자택', address: '서울특별시 서초구 서초대로 456', lat: 37.4947, lng: 127.0280, type: '자택' },
+            { name: '자택', address: '서울특별시 송파구 올림픽로 789', lat: 37.5145, lng: 127.1059, type: '자택' },
+            { name: '자택', address: '서울특별시 마포구 월드컵로 321', lat: 37.5665, lng: 126.9020, type: '자택' },
+            { name: '자택', address: '서울특별시 용산구 한강대로 654', lat: 37.5384, lng: 126.9650, type: '자택' }
+        ];
+        
+        // 검색 관련 요소들
+        const startLocationInput = document.getElementById('startLocationInput');
+        const endLocationInput = document.getElementById('endLocationInput');
+        const clearStartBtn = document.getElementById('clearStartBtn');
+        const clearEndBtn = document.getElementById('clearEndBtn');
+        const swapLocationsBtn = document.getElementById('swapLocationsBtn');
+
+        
+        // 검색 모달 요소들
+        const searchModal = document.getElementById('searchModal');
+        const backBtn = document.getElementById('backBtn');
+        const searchTypeDot = document.getElementById('searchTypeDot');
+        const searchTypeText = document.getElementById('searchTypeText');
+        const currentLocationItem = document.getElementById('currentLocationItem');
+        const currentLocationAddress = document.getElementById('currentLocationAddress');
+        
+        // 새로운 검색 입력 필드들
+        const hospitalInput = document.getElementById('hospitalInput');
+        const roomInput = document.getElementById('roomInput');
+        const addressInput = document.getElementById('addressInput');
+        const unifiedInput = document.getElementById('unifiedInput');
+        
+        // 클리어 버튼들
+        const hospitalClearBtn = document.getElementById('hospitalClearBtn');
+        const roomClearBtn = document.getElementById('roomClearBtn');
+        const addressClearBtn = document.getElementById('addressClearBtn');
+        const unifiedClearBtn = document.getElementById('unifiedClearBtn');
+        
+        const recentList = document.getElementById('recentList');
+        const searchResults = document.getElementById('searchResults');
+        const recommendedList = document.getElementById('recommendedList');
+        
+        // 선택된 위치 정보 저장
+        let selectedStartLocation = null;
+        let selectedEndLocation = null;
+        let currentSearchType = 'start'; // 'start' 또는 'end'
+        let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        let currentLocationData = null;
+        
+        // 운영자 모드 체크 함수
+        function isOperatorMode() {
+            // URL 파라미터로 운영자 모드 체크
+            const urlParams = new URLSearchParams(window.location.search);
+            const operatorMode = urlParams.get('operator') === 'true';
+            
+            // localStorage에서 운영자 모드 체크
+            const storedOperatorMode = localStorage.getItem('operatorMode') === 'true';
+            
+            // 세션에서 운영자 모드 체크 (예: 로그인 정보)
+            const sessionOperatorMode = sessionStorage.getItem('userRole') === 'operator';
+            
+            return operatorMode || storedOperatorMode || sessionOperatorMode;
+        }
+        
+        // 운영자 모드 UI 업데이트
+        function updateOperatorModeUI() {
+            const operatorMode = isOperatorMode();
+            const operatorToggleBtn = document.getElementById('operatorToggleBtn');
+            
+            if (operatorMode) {
+                // 헤더에 운영자 모드 표시
+                const header = document.querySelector('.header h1');
+                if (header) {
+                    header.innerHTML = '민간구급차 호출 서비스 <span style="font-size: 0.8em; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; margin-left: 8px;">운영자</span>';
+                }
+                
+                // 출발지/도착지 입력 필드에 운영자 모드 표시
+                const startInput = document.getElementById('startLocationInput');
+                const endInput = document.getElementById('endLocationInput');
+                
+                if (startInput) {
+                    startInput.placeholder = '출발지 (운영자 모드: 선택사항)';
+                }
+                if (endInput) {
+                    endInput.placeholder = '도착지 (운영자 모드: 선택사항)';
+                }
+                
+                // 토글 버튼 스타일 업데이트
+                if (operatorToggleBtn) {
+                    operatorToggleBtn.style.background = 'rgba(52, 199, 89, 0.3)';
+                    operatorToggleBtn.title = '운영자 모드 활성화됨 (클릭하여 비활성화)';
+                }
+                
+                console.log('운영자 모드 활성화됨');
+            } else {
+                // 일반 모드로 복원
+                const header = document.querySelector('.header h1');
+                if (header) {
+                    header.innerHTML = '민간구급차 호출 서비스';
+                }
+                
+                const startInput = document.getElementById('startLocationInput');
+                const endInput = document.getElementById('endLocationInput');
+                
+                if (startInput) {
+                    startInput.placeholder = '출발지 - 병원명 병실호수 / 주소지';
+                }
+                if (endInput) {
+                    endInput.placeholder = '도착지 - 병원명 / 자택-주소';
+                }
+                
+                // 토글 버튼 스타일 업데이트
+                if (operatorToggleBtn) {
+                    operatorToggleBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                    operatorToggleBtn.title = '운영자 모드 토글';
+                }
+                
+                console.log('일반 모드');
+            }
+        }
+        
+        // 현재 위치 가져오기 (페이지 로드 시 자동 실행)
+        window.addEventListener('load', async function() {
+            try {
+                // Kakao Map API 체크
+                await checkKakaoMapAPI();
+                
+                // 지도 초기화
+                map = initializeMap();
+                
+                console.log('Kakao Map API 사용 가능, 실제 지도 로드');
+            } catch (error) {
+                console.error('Kakao Map API 사용 불가, 목업 지도 사용:', error);
+                // API 사용 불가 시 목업 지도 표시
+                initMockMap();
+            }
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lon = position.coords.longitude;
+                    var locPosition = new kakao.maps.LatLng(lat, lon);
+                    
+                    console.log('현재 위치:', lat, lon);
+                    
+                    // 지도 중심 이동
+                    map.setCenter(locPosition);
+                    
+                    // 마커 생성
+                    var marker = new kakao.maps.Marker({
+                        position: locPosition
+                    });
+                    marker.setMap(map);
+                    
+                    // 현재 위치를 출발지로 설정 (더미 주소 사용)
+                    const currentAddress = '현재 위치 (GPS 좌표: ' + lat.toFixed(4) + ', ' + lon.toFixed(4) + ')';
+                    console.log('현재 위치 주소:', currentAddress);
+                    
+                    startLocationInput.value = '현재 위치';
+                    clearStartBtn.style.display = 'block';
+                    
+                    selectedStartLocation = {
+                        name: '현재 위치',
+                        address: currentAddress,
+                        lat: lat,
+                        lng: lon
+                    };
+                    
+                    currentLocationData = selectedStartLocation;
+                    currentLocationAddress.textContent = currentAddress;
+                    
+                                            console.log('출발지로 설정된 현재 위치:', selectedStartLocation);
+                    
+                }, function(error) {
+                    console.error('위치 정보를 가져올 수 없습니다:', error);
+                    
+                    // 위치 접근 실패 시 서울시청을 기본 출발지로 설정
+                    const defaultLocation = dummyPlaces.find(place => place.name === '시청역');
+                    if (defaultLocation) {
+                        startLocationInput.value = defaultLocation.name;
+                        clearStartBtn.style.display = 'block';
+                        
+                        selectedStartLocation = {
+                            name: defaultLocation.name,
+                            address: defaultLocation.address,
+                            lat: defaultLocation.lat,
+                            lng: defaultLocation.lng
+                        };
+                        
+                        console.log('기본 출발지 설정:', selectedStartLocation);
+                    }
+                    
+                    alert('위치 정보를 가져올 수 없어 시청역을 기본 출발지로 설정했습니다.');
+                });
+            } else {
+                console.error('이 브라우저는 위치 서비스를 지원하지 않습니다.');
+                
+                // 위치 서비스 미지원 시 서울시청을 기본 출발지로 설정
+                const defaultLocation = dummyPlaces.find(place => place.name === '시청역');
+                if (defaultLocation) {
+                    startLocationInput.value = defaultLocation.name;
+                    clearStartBtn.style.display = 'block';
+                    
+                    selectedStartLocation = {
+                        name: defaultLocation.name,
+                        address: defaultLocation.address,
+                        lat: defaultLocation.lat,
+                        lng: defaultLocation.lng
+                    };
+                    
+                    console.log('기본 출발지 설정:', selectedStartLocation);
+                }
+                
+                alert('위치 서비스를 지원하지 않아 시청역을 기본 출발지로 설정했습니다.');
+            }
+            
+            // 검색 이벤트 리스너 초기화
+            initLocationSearch();
+            
+            // 광고 슬라이더 초기화
+            initAdSlider();
+            
+            // 운영자 모드 UI 업데이트
+            updateOperatorModeUI();
+        });
+        
+        // 위치 검색 초기화
+        function initLocationSearch() {
+            // 출발지 입력 필드 클릭 시 검색 모달 열기
+            startLocationInput.addEventListener('click', function() {
+                openSearchModal('start');
+            });
+            
+            // 도착지 입력 필드 클릭 시 검색 모달 열기
+            endLocationInput.addEventListener('click', function() {
+                openSearchModal('end');
+            });
+            
+            // 검색어 삭제 버튼
+            clearStartBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                startLocationInput.value = '';
+                clearStartBtn.style.display = 'none';
+                selectedStartLocation = null;
+            });
+            
+            clearEndBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                endLocationInput.value = '';
+                clearEndBtn.style.display = 'none';
+                selectedEndLocation = null;
+            });
+            
+            // 출발지/도착지 바꾸기
+            swapLocationsBtn.addEventListener('click', function() {
+                const tempValue = startLocationInput.value;
+                const tempLocation = selectedStartLocation;
+                
+                startLocationInput.value = endLocationInput.value;
+                endLocationInput.value = tempValue;
+                
+                selectedStartLocation = selectedEndLocation;
+                selectedEndLocation = tempLocation;
+                
+                // clear 버튼 상태 업데이트
+                clearStartBtn.style.display = startLocationInput.value ? 'block' : 'none';
+                clearEndBtn.style.display = endLocationInput.value ? 'block' : 'none';
+            });
+            
+
+            
+            // 검색 모달 이벤트 리스너
+            initSearchModal();
+        }
+        
+        // 검색 모달 초기화
+        function initSearchModal() {
+            // 뒤로가기 버튼
+            backBtn.addEventListener('click', closeSearchModal);
+            
+            // 현재 위치 선택
+            currentLocationItem.addEventListener('click', function() {
+                if (currentLocationData) {
+                    selectLocation(currentLocationData);
+                }
+            });
+            
+            // 병원명 검색 입력
+            hospitalInput.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                hospitalClearBtn.style.display = keyword.length > 0 ? 'block' : 'none';
+                performCombinedSearch();
+            });
+            
+            // 병실호수 입력
+            roomInput.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                roomClearBtn.style.display = keyword.length > 0 ? 'block' : 'none';
+                performCombinedSearch();
+            });
+            
+            // 주소지 검색 입력
+            addressInput.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                addressClearBtn.style.display = keyword.length > 0 ? 'block' : 'none';
+                performCombinedSearch();
+            });
+            
+            // 통합 검색 입력
+            unifiedInput.addEventListener('input', function() {
+                const keyword = this.value.trim();
+                unifiedClearBtn.style.display = keyword.length > 0 ? 'block' : 'none';
+                if (keyword.length > 0) {
+                    performSearch(keyword);
+                } else {
+                    hideSearchResults();
+                }
+            });
+            
+            // 클리어 버튼들
+            hospitalClearBtn.addEventListener('click', function() {
+                hospitalInput.value = '';
+                hospitalClearBtn.style.display = 'none';
+                performCombinedSearch();
+                hospitalInput.focus();
+            });
+            
+            roomClearBtn.addEventListener('click', function() {
+                roomInput.value = '';
+                roomClearBtn.style.display = 'none';
+                performCombinedSearch();
+                roomInput.focus();
+            });
+            
+            addressClearBtn.addEventListener('click', function() {
+                addressInput.value = '';
+                addressClearBtn.style.display = 'none';
+                performCombinedSearch();
+                addressInput.focus();
+            });
+            
+            unifiedClearBtn.addEventListener('click', function() {
+                unifiedInput.value = '';
+                unifiedClearBtn.style.display = 'none';
+                hideSearchResults();
+                unifiedInput.focus();
+            });
+            
+            // 추천 장소 초기화
+            initRecommendedPlaces();
+        }
+        
+        // 검색 모달 열기
+        function openSearchModal(type) {
+            currentSearchType = type;
+            
+            // 모달 제목 설정
+            if (type === 'start') {
+                searchTypeDot.className = 'search-type-dot start';
+                searchTypeText.textContent = '출발지 검색';
+            } else {
+                searchTypeDot.className = 'search-type-dot end';
+                searchTypeText.textContent = '도착지 검색';
+            }
+            
+            // 모든 검색 입력 초기화
+            hospitalInput.value = '';
+            roomInput.value = '';
+            addressInput.value = '';
+            unifiedInput.value = '';
+            
+            // 모든 클리어 버튼 숨기기
+            hospitalClearBtn.style.display = 'none';
+            roomClearBtn.style.display = 'none';
+            addressClearBtn.style.display = 'none';
+            unifiedClearBtn.style.display = 'none';
+            
+            hideSearchResults();
+            
+            // 최근 검색 업데이트
+            updateRecentSearches();
+            
+            // 모달 표시
+            searchModal.style.display = 'flex';
+            
+            // 첫 번째 입력 필드에 포커스
+            setTimeout(() => {
+                hospitalInput.focus();
+            }, 100);
+        }
+        
+        // 검색 모달 닫기
+        function closeSearchModal() {
+            searchModal.style.display = 'none';
+        }
+        
+        // 위치 선택
+        function selectLocation(locationData) {
+            console.log('선택된 위치:', locationData);
+            
+            // 표시할 이름 결정
+            let displayName = locationData.name;
+            
+            // 조합 검색에서 선택된 경우 현재 입력된 값들을 조합
+            const hospitalKeyword = hospitalInput.value.trim();
+            const roomKeyword = roomInput.value.trim();
+            const addressKeyword = addressInput.value.trim();
+            
+            if (hospitalKeyword || roomKeyword || addressKeyword) {
+                let combinedName = '';
+                
+                if (hospitalKeyword && roomKeyword) {
+                    combinedName = `${hospitalKeyword} ${roomKeyword}`;
+                } else if (hospitalKeyword) {
+                    combinedName = hospitalKeyword;
+                } else if (locationData.isHospitalRoom) {
+                    combinedName = locationData.name;
+                } else {
+                    combinedName = locationData.name;
+                }
+                
+                if (addressKeyword && !locationData.address.includes(addressKeyword)) {
+                    combinedName += ` / ${addressKeyword}`;
+                }
+                
+                displayName = combinedName;
+            }
+            
+            if (currentSearchType === 'start') {
+                startLocationInput.value = displayName;
+                clearStartBtn.style.display = 'block';
+                selectedStartLocation = {
+                    ...locationData,
+                    name: displayName
+                };
+            } else {
+                endLocationInput.value = displayName;
+                clearEndBtn.style.display = 'block';
+                selectedEndLocation = {
+                    ...locationData,
+                    name: displayName
+                };
+            }
+            
+            // 최근 검색에 추가
+            addToRecentSearches({
+                ...locationData,
+                name: displayName
+            });
+            
+            closeSearchModal();
+        }
+        
+        // 조합 검색 수행 (병원명 + 병실호수 + 주소지)
+        function performCombinedSearch() {
+            const hospitalKeyword = hospitalInput.value.trim();
+            const roomKeyword = roomInput.value.trim();
+            const addressKeyword = addressInput.value.trim();
+            
+            // 모든 필드가 비어있으면 검색 결과 숨기기
+            if (!hospitalKeyword && !roomKeyword && !addressKeyword) {
+                hideSearchResults();
+                return;
+            }
+            
+            let searchResults = [];
+            
+            // 병원명이 입력된 경우
+            if (hospitalKeyword) {
+                const matchingHospitals = hospitalData.filter(hospital =>
+                    hospital.name.toLowerCase().includes(hospitalKeyword.toLowerCase())
+                );
+                
+                matchingHospitals.forEach(hospital => {
+                    // 병실호수가 입력된 경우
+                    if (roomKeyword) {
+                        const matchingRooms = hospital.rooms ? hospital.rooms.filter(room =>
+                            room.toLowerCase().includes(roomKeyword.toLowerCase())
+                        ) : [];
+                        
+                        if (matchingRooms.length > 0) {
+                            matchingRooms.forEach(room => {
+                                searchResults.push({
+                                    name: `${hospital.name} ${room}`,
+                                    address: hospital.address,
+                                    lat: hospital.lat,
+                                    lng: hospital.lng,
+                                    type: hospital.type,
+                                    isHospitalRoom: true,
+                                    hospitalName: hospital.name,
+                                    roomNumber: room
+                                });
+                            });
+                        }
+                    } else {
+                        // 병실호수가 없으면 병원만 표시
+                        searchResults.push(hospital);
+                    }
+                });
+            }
+            
+            // 주소지 검색
+            if (addressKeyword) {
+                const allPlaces = [...dummyPlaces, ...hospitalData, ...homeData];
+                const addressMatches = allPlaces.filter(place =>
+                    place.address.toLowerCase().includes(addressKeyword.toLowerCase())
+                );
+                searchResults = [...searchResults, ...addressMatches];
+            }
+            
+            // 병실호수만 입력된 경우 (병원명 없이)
+            if (roomKeyword && !hospitalKeyword) {
+                hospitalData.forEach(hospital => {
+                    if (hospital.rooms) {
+                        const matchingRooms = hospital.rooms.filter(room =>
+                            room.toLowerCase().includes(roomKeyword.toLowerCase())
+                        );
+                        
+                        matchingRooms.forEach(room => {
+                            searchResults.push({
+                                name: `${hospital.name} ${room}`,
+                                address: hospital.address,
+                                lat: hospital.lat,
+                                lng: hospital.lng,
+                                type: hospital.type,
+                                isHospitalRoom: true,
+                                hospitalName: hospital.name,
+                                roomNumber: room
+                            });
+                        });
+                    }
+                });
+            }
+            
+            // 중복 제거
+            const uniqueResults = searchResults.filter((place, index, self) =>
+                index === self.findIndex(p => 
+                    p.name === place.name && p.address === place.address
+                )
+            );
+            
+            displaySearchResults(uniqueResults);
+        }
+        
+        // 통합 검색 수행 (기존 방식)
+        function performSearch(keyword) {
+            // 일반 장소, 병원, 자택 데이터 합치기
+            const allPlaces = [...dummyPlaces, ...hospitalData, ...homeData];
+            let searchResults = [];
+            
+            // 기본 장소 검색
+            const filteredPlaces = allPlaces.filter(place =>
+                place.name.toLowerCase().includes(keyword.toLowerCase()) ||
+                place.address.toLowerCase().includes(keyword.toLowerCase()) ||
+                (place.type && place.type.toLowerCase().includes(keyword.toLowerCase()))
+            );
+            
+            searchResults = [...filteredPlaces];
+            
+            // 병원 + 병실호수 검색
+            hospitalData.forEach(hospital => {
+                if (hospital.rooms) {
+                    hospital.rooms.forEach(room => {
+                        const hospitalWithRoom = `${hospital.name} ${room}`;
+                        if (hospitalWithRoom.toLowerCase().includes(keyword.toLowerCase()) ||
+                            room.toLowerCase().includes(keyword.toLowerCase())) {
+                            searchResults.push({
+                                name: `${hospital.name} ${room}`,
+                                address: hospital.address,
+                                lat: hospital.lat,
+                                lng: hospital.lng,
+                                type: hospital.type,
+                                isHospitalRoom: true,
+                                hospitalName: hospital.name,
+                                roomNumber: room
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // 중복 제거
+            const uniqueResults = searchResults.filter((place, index, self) =>
+                index === self.findIndex(p => p.name === place.name && p.address === place.address)
+            );
+            
+            displaySearchResults(uniqueResults);
+        }
+        
+        // 검색 결과 표시
+        function displaySearchResults(places) {
+            searchResults.innerHTML = '';
+            
+            if (places.length > 0) {
+                places.forEach(place => {
+                    const item = createLocationItem(place, 'fas fa-map-marker-alt');
+                    searchResults.appendChild(item);
+                });
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = '<div class="location-item"><div class="location-info"><div class="location-name">검색 결과가 없습니다</div></div></div>';
+                searchResults.style.display = 'block';
+            }
+        }
+        
+        // 검색 결과 숨기기
+        function hideSearchResults() {
+            searchResults.style.display = 'none';
+        }
+        
+        // 위치 아이템 생성
+        function createLocationItem(locationData, iconClass) {
+            const item = document.createElement('div');
+            item.className = 'location-item';
+            
+            // 아이콘 설정
+            let displayIcon = iconClass;
+            if (locationData.type === '종합병원' || locationData.isHospitalRoom) {
+                displayIcon = 'fas fa-hospital';
+            } else if (locationData.type === '자택') {
+                displayIcon = 'fas fa-home';
+            }
+            
+            // 이름 표시 설정
+            let displayName = locationData.name;
+            let displayAddress = locationData.address;
+            
+            if (locationData.isHospitalRoom) {
+                displayName = `${locationData.hospitalName} ${locationData.roomNumber}`;
+                displayAddress = `${locationData.address} (${locationData.roomNumber})`;
+            } else if (locationData.type === '자택') {
+                displayName = `자택`;
+                displayAddress = locationData.address;
+            }
+            
+            item.innerHTML = `
+                <div class="location-icon-wrapper">
+                    <i class="${displayIcon}"></i>
+                </div>
+                <div class="location-info">
+                    <div class="location-name">${displayName}</div>
+                    <div class="location-address">${displayAddress}</div>
+                </div>
+            `;
+            
+            item.addEventListener('click', function() {
+                selectLocation({
+                    ...locationData,
+                    name: displayName,
+                    displayAddress: displayAddress
+                });
+            });
+            
+            return item;
+        }
+        
+        // 최근 검색 업데이트
+        function updateRecentSearches() {
+            recentList.innerHTML = '';
+            
+            if (recentSearches.length > 0) {
+                recentSearches.slice(0, 5).forEach(location => {
+                    const item = createRecentItem(location);
+                    recentList.appendChild(item);
+                });
+            } else {
+                recentList.innerHTML = '<div class="location-item"><div class="location-info"><div class="location-name">최근 검색 내역이 없습니다</div></div></div>';
+            }
+        }
+        
+        // 최근 검색 아이템 생성
+        function createRecentItem(locationData) {
+            const item = document.createElement('div');
+            item.className = 'location-item recent-item';
+            item.innerHTML = `
+                <div class="location-icon-wrapper">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="location-info">
+                    <div class="location-name">${locationData.name}</div>
+                    <div class="location-address">${locationData.address}</div>
+                </div>
+                <button class="delete-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // 위치 선택 이벤트
+            item.addEventListener('click', function(e) {
+                if (!e.target.closest('.delete-btn')) {
+                    selectLocation(locationData);
+                }
+            });
+            
+            // 삭제 버튼 이벤트
+            const deleteBtn = item.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                removeFromRecentSearches(locationData);
+                updateRecentSearches();
+            });
+            
+            return item;
+        }
+        
+        // 최근 검색에 추가
+        function addToRecentSearches(locationData) {
+            // 중복 제거
+            recentSearches = recentSearches.filter(item => 
+                item.name !== locationData.name || item.address !== locationData.address
+            );
+            
+            // 맨 앞에 추가
+            recentSearches.unshift(locationData);
+            
+            // 최대 10개까지만 저장
+            if (recentSearches.length > 10) {
+                recentSearches = recentSearches.slice(0, 10);
+            }
+            
+            // 로컬 스토리지에 저장
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+        }
+        
+        // 최근 검색에서 제거
+        function removeFromRecentSearches(locationData) {
+            recentSearches = recentSearches.filter(item => 
+                item.name !== locationData.name || item.address !== locationData.address
+            );
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+        }
+        
+        // 추천 장소 초기화
+        function initRecommendedPlaces() {
+            const recommendedPlaces = [
+                // 주요 역
+                dummyPlaces.find(p => p.name === '서울역'),
+                dummyPlaces.find(p => p.name === '강남역'),
+                // 주요 병원
+                hospitalData.find(h => h.name === '서울대학교병원'),
+                hospitalData.find(h => h.name === '삼성서울병원'),
+                // 자택 옵션
+                homeData[0], // 첫 번째 자택
+                // 기타 주요 장소
+                dummyPlaces.find(p => p.name === '홍대입구역'),
+                dummyPlaces.find(p => p.name === '명동역')
+            ].filter(Boolean);
+            
+            recommendedList.innerHTML = '';
+            recommendedPlaces.forEach(place => {
+                const item = createLocationItem(place, 'fas fa-star');
+                recommendedList.appendChild(item);
+            });
+        }
+        
+
+        
+        // 기존 마커와 경로 저장 변수
+        let currentMarkers = [];
+        let currentPolylines = [];
+        
+        // 지도 초기화 함수
+        function clearMapElements() {
+            // 기존 마커 제거
+            currentMarkers.forEach(marker => marker.setMap(null));
+            currentMarkers = [];
+            
+            // 기존 경로 제거
+            currentPolylines.forEach(polyline => polyline.setMap(null));
+            currentPolylines = [];
+        }
+        
+        // 경로 검색 함수
+        function searchRoute() {
+            console.log('경로 검색 시작');
+            console.log('출발지 데이터:', selectedStartLocation);
+            console.log('도착지 데이터:', selectedEndLocation);
+            
+            if (!selectedStartLocation || !selectedEndLocation) {
+                alert('출발지와 도착지를 모두 선택해주세요.');
+                return;
+            }
+            
+            try {
+                // 기존 요소들 제거
+                clearMapElements();
+                
+                // 출발지 마커 생성
+                const startMarker = new kakao.maps.Marker({
+                    position: new kakao.maps.LatLng(selectedStartLocation.lat, selectedStartLocation.lng),
+                    map: map,
+                    image: new kakao.maps.MarkerImage(
+                        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/red_b.png',
+                        new kakao.maps.Size(31, 35),
+                        {offset: new kakao.maps.Point(15, 35)}
+                    )
+                });
+                currentMarkers.push(startMarker);
+                
+                // 도착지 마커 생성
+                const endMarker = new kakao.maps.Marker({
+                    position: new kakao.maps.LatLng(selectedEndLocation.lat, selectedEndLocation.lng),
+                    map: map,
+                    image: new kakao.maps.MarkerImage(
+                        'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/blue_b.png',
+                        new kakao.maps.Size(31, 35),
+                        {offset: new kakao.maps.Point(15, 35)}
+                    )
+                });
+                currentMarkers.push(endMarker);
+                
+                // 경로 표시 (직선)
+                const linePath = [
+                    new kakao.maps.LatLng(selectedStartLocation.lat, selectedStartLocation.lng),
+                    new kakao.maps.LatLng(selectedEndLocation.lat, selectedEndLocation.lng)
+                ];
+                
+                const polyline = new kakao.maps.Polyline({
+                    path: linePath,
+                    strokeWeight: 5,
+                    strokeColor: '#1976d2',
+                    strokeOpacity: 0.8,
+                    strokeStyle: 'solid'
+                });
+                
+                polyline.setMap(map);
+                currentPolylines.push(polyline);
+                
+                // 지도 범위 조정하여 두 지점이 모두 보이도록
+                const bounds = new kakao.maps.LatLngBounds();
+                bounds.extend(new kakao.maps.LatLng(selectedStartLocation.lat, selectedStartLocation.lng));
+                bounds.extend(new kakao.maps.LatLng(selectedEndLocation.lat, selectedEndLocation.lng));
+                map.setBounds(bounds);
+                
+                // 거리 계산 (대략적)
+                const distance = calculateDistance(
+                    selectedStartLocation.lat, selectedStartLocation.lng,
+                    selectedEndLocation.lat, selectedEndLocation.lng
+                );
+                
+                alert(`경로가 표시되었습니다.\n출발지: ${selectedStartLocation.name}\n도착지: ${selectedEndLocation.name}\n직선거리: 약 ${distance.toFixed(1)}km`);
+                
+                console.log('경로 검색 완료');
+                
+            } catch (error) {
+                console.error('경로 검색 중 오류:', error);
+                alert('경로 검색 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        }
+        
+        // 두 지점 간 거리 계산 (하버사인 공식)
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // 지구 반지름 (km)
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        // 광고 슬라이더 초기화
+        function initAdSlider() {
+            const slides = document.querySelectorAll('.ad-slide');
+            const indicators = document.querySelectorAll('.ad-indicator');
+            let currentIndex = 0;
+            
+            if (slides.length === 0 || indicators.length === 0) {
+                console.log('광고 슬라이더 요소를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 모든 슬라이드 초기화
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === 0) {
+                    slide.classList.add('active');
+                }
+            });
+            
+            // 모든 인디케이터 초기화
+            indicators.forEach((indicator, index) => {
+                indicator.classList.remove('active');
+                if (index === 0) {
+                    indicator.classList.add('active');
+                }
+            });
+            
+            // 광고 자동 슬라이드
+            setInterval(() => {
+                // 현재 슬라이드 비활성화
+                slides[currentIndex].classList.remove('active');
+                slides[currentIndex].classList.add('prev');
+                indicators[currentIndex].classList.remove('active');
+                
+                // 다음 슬라이드 인덱스 계산
+                currentIndex = (currentIndex + 1) % slides.length;
+                
+                // 다음 슬라이드 활성화
+                slides[currentIndex].classList.remove('prev');
+                slides[currentIndex].classList.add('active');
+                indicators[currentIndex].classList.add('active');
+                
+                // 이전 슬라이드 정리
+                setTimeout(() => {
+                    slides.forEach((slide, i) => {
+                        if (i !== currentIndex) {
+                            slide.classList.remove('prev');
+                        }
+                    });
+                }, 500);
+            }, 4000); // 4초마다 슬라이드 변경
+            
+            // 인디케이터 클릭 이벤트
+            indicators.forEach((indicator, idx) => {
+                indicator.addEventListener('click', () => {
+                    if (idx !== currentIndex) {
+                        // 현재 슬라이드 비활성화
+                        slides[currentIndex].classList.remove('active');
+                        indicators[currentIndex].classList.remove('active');
+                        
+                        // 선택한 슬라이드 활성화
+                        currentIndex = idx;
+                        slides[currentIndex].classList.add('active');
+                        indicators[currentIndex].classList.add('active');
+                    }
+                });
+            });
+            
+            // 광고 버튼 클릭 이벤트
+            const adButtons = document.querySelectorAll('.ad-button');
+            const adMessages = [
+                '호출이 앱 다운로드 페이지로 이동합니다.',
+                '응급처치 교육 정보 페이지로 이동합니다.',
+                '응급 의료 보험 가입 페이지로 이동합니다.',
+                '건강관리 앱 다운로드 페이지로 이동합니다.'
+            ];
+            
+            adButtons.forEach((button, idx) => {
+                button.addEventListener('click', () => {
+                    alert(adMessages[idx]);
+                });
+            });
+        }
+        
+        // 응급 호출 버튼 클릭 이벤트
+        document.getElementById('emergencyBtn').addEventListener('click', function() {
+            // 운영자 모드 체크
+            const operatorMode = isOperatorMode();
+            
+            // 선택된 위치 정보를 localStorage에 저장
+            if (selectedStartLocation) {
+                localStorage.setItem('selectedStartLocation', JSON.stringify(selectedStartLocation));
+            }
+            if (selectedEndLocation) {
+                localStorage.setItem('selectedEndLocation', JSON.stringify(selectedEndLocation));
+            }
+            
+            // 운영자 모드가 아닌 경우에만 위치 검증
+            if (!operatorMode) {
+                if (!selectedStartLocation || !selectedEndLocation) {
+                    alert('출발지와 도착지를 모두 선택해주세요.');
+                    return;
+                }
+            } else {
+                // 운영자 모드에서는 위치가 없어도 진행
+                console.log('운영자 모드: 위치 검증 건너뜀');
+                
+                // 위치가 없는 경우 기본값 설정
+                if (!selectedStartLocation) {
+                    localStorage.setItem('selectedStartLocation', JSON.stringify({
+                        name: '운영자 지정 출발지',
+                        address: '운영자가 직접 지정',
+                        lat: 37.566826,
+                        lng: 126.978656
+                    }));
+                }
+                if (!selectedEndLocation) {
+                    localStorage.setItem('selectedEndLocation', JSON.stringify({
+                        name: '운영자 지정 도착지',
+                        address: '운영자가 직접 지정',
+                        lat: 37.566826,
+                        lng: 126.978656
+                    }));
+                }
+            }
+            
+            window.location.href = 'emergency.html';
+        });
+        
+        // 예약 호출 버튼 클릭 이벤트
+        document.getElementById('reservationBtn').addEventListener('click', function() {
+            // 운영자 모드 체크
+            const operatorMode = isOperatorMode();
+            
+            // 선택된 위치 정보를 localStorage에 저장
+            if (selectedStartLocation) {
+                localStorage.setItem('selectedStartLocation', JSON.stringify(selectedStartLocation));
+            }
+            if (selectedEndLocation) {
+                localStorage.setItem('selectedEndLocation', JSON.stringify(selectedEndLocation));
+            }
+            
+            // 운영자 모드가 아닌 경우에만 위치 검증
+            if (!operatorMode) {
+                if (!selectedStartLocation || !selectedEndLocation) {
+                    alert('출발지와 도착지를 모두 선택해주세요.');
+                    return;
+                }
+            } else {
+                // 운영자 모드에서는 위치가 없어도 진행
+                console.log('운영자 모드: 위치 검증 건너뜀');
+                
+                // 위치가 없는 경우 기본값 설정
+                if (!selectedStartLocation) {
+                    localStorage.setItem('selectedStartLocation', JSON.stringify({
+                        name: '운영자 지정 출발지',
+                        address: '운영자가 직접 지정',
+                        lat: 37.566826,
+                        lng: 126.978656
+                    }));
+                }
+                if (!selectedEndLocation) {
+                    localStorage.setItem('selectedEndLocation', JSON.stringify({
+                        name: '운영자 지정 도착지',
+                        address: '운영자가 직접 지정',
+                        lat: 37.566826,
+                        lng: 126.978656
+                    }));
+                }
+            }
+            
+            window.location.href = 'reservation.html';
+        });
+        
+        // 운영자 모드 토글 버튼 이벤트
+        const operatorToggleBtn = document.getElementById('operatorToggleBtn');
+        operatorToggleBtn.addEventListener('click', function() {
+            const currentMode = localStorage.getItem('operatorMode') === 'true';
+            const newMode = !currentMode;
+            
+            localStorage.setItem('operatorMode', newMode.toString());
+            
+            if (newMode) {
+                alert('운영자 모드가 활성화되었습니다.\n출발지/도착지 없이도 호출이 가능합니다.');
+                operatorToggleBtn.style.background = 'rgba(52, 199, 89, 0.3)';
+            } else {
+                alert('운영자 모드가 비활성화되었습니다.\n출발지/도착지를 모두 입력해야 합니다.');
+                operatorToggleBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+            }
+            
+            // UI 업데이트
+            updateOperatorModeUI();
+        });
+        
+        // 요금 안내 모달 관련 이벤트
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const helpCloseBtn = document.getElementById('helpCloseBtn');
+        
+        // 요금 안내 버튼 클릭 시 모달 열기
+        helpBtn.addEventListener('click', function() {
+            helpModal.style.display = 'flex';
+        });
+        
+        // 모달 닫기 버튼 클릭 시 모달 닫기
+        helpCloseBtn.addEventListener('click', function() {
+            helpModal.style.display = 'none';
+        });
+        
+        // 모달 배경 클릭 시 모달 닫기
+        helpModal.addEventListener('click', function(e) {
+            if (e.target === helpModal) {
+                helpModal.style.display = 'none';
+            }
+        });
+        
+        // 페이지 로드 시 초기화 (DOMContentLoaded는 제거하고 window.load만 사용)
+        // 이미 window.addEventListener('load', ...)가 있으므로 중복 제거
+    </script>
+</body>
+</html> 

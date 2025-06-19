@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>심장마비 (CPR) 응급처치</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .content {
+            padding: 20px;
+            height: calc(100% - 60px - 80px);
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+
+        .step-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: #ff3b30;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .step-desc {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .step-image {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .warning-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9500;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-title {
+            color: #ff9500;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-text {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- 상단 헤더 -->
+        <div class="header">
+            <a href="ai.html" class="back-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <h1>심장마비 (CPR)</h1>
+            <div style="width: 18px;"></div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="content">
+            <div class="step-container">
+                <div class="step-number">1</div>
+                <div class="step-title">의식 확인</div>
+                <div class="step-desc">
+                    환자의 어깨를 두드리며 "괜찮으세요?"라고 큰소리로 물어보고, 반응이 없는 경우 즉시 119에 신고합니다.
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-user-md fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-number">2</div>
+                <div class="step-title">호흡 확인</div>
+                <div class="step-desc">
+                    환자의 가슴이 움직이는지, 호흡이 느껴지는지 10초 동안 확인합니다. 정상적인 호흡이 없다면 CPR을 시작합니다.
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-lungs fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-number">3</div>
+                <div class="step-title">가슴 압박</div>
+                <div class="step-desc">
+                    1. 환자를 바닥에 똑바로 눕힙니다.<br>
+                    2. 양손을 겹쳐 환자의 가슴 중앙에 위치시킵니다.<br>
+                    3. 팔을 곧게 펴고 어깨를 가슴 위에 위치시킵니다.<br>
+                    4. 분당 100-120회의 속도로 가슴을 5-6cm 깊이로 압박합니다.
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-heartbeat fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-number">4</div>
+                <div class="step-title">인공호흡</div>
+                <div class="step-desc">
+                    1. 30회의 가슴 압박 후 2회의 인공호흡을 실시합니다.<br>
+                    2. 환자의 턱을 들어올려 기도를 열고, 코를 막은 후 입으로 1초 동안 숨을 불어넣습니다.<br>
+                    3. 가슴이 올라오는 것을 확인합니다.
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-wind fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    주의사항
+                </div>
+                <div class="warning-text">
+                    • 전문가가 도착할 때까지 CPR을 계속합니다.<br>
+                    • 가슴 압박 시 환자의 갈비뼈가 부러질 수 있으나, 생명을 구하기 위해 계속해야 합니다.<br>
+                    • 인공호흡이 어려운 경우 가슴 압박만이라도 계속합니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 네비게이션 -->
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>홈</span>
+            </a>
+            <a href="history.html" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>이용내역</span>
+            </a>
+            <a href="ai.html" class="nav-item active">
+                <i class="fas fa-heartbeat"></i>
+                <span>응급처치</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>프로필</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html> 

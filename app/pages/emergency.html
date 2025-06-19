@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>응급 호출 - 민간구급차 서비스</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/emergency.css">
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <!-- Auth Manager -->
+    <script src="../assets/js/auth.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            width: 411px;
+            height: 731px;
+            margin: 20px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 작은 Android 화면 (360x640) 대응 */
+        @media (max-width: 411px) {
+            .app-container {
+                width: 360px;
+                height: 640px;
+                margin: 10px auto;
+                border-radius: 15px;
+            }
+            
+            .emergency-header {
+                padding: 15px 12px;
+            }
+            
+            .emergency-header h1 {
+                font-size: 1.1rem;
+            }
+            
+            .emergency-status {
+                margin: 15px;
+                padding: 20px;
+            }
+            
+            .status-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 30px;
+            }
+            
+            .status-title {
+                font-size: 20px;
+            }
+            
+            .status-message {
+                font-size: 14px;
+            }
+            
+            .location-info, .action-card {
+                margin: 15px;
+                padding: 15px;
+            }
+            
+            .location-title {
+                font-size: 16px;
+            }
+            
+            .location-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 14px;
+            }
+            
+            .location-name {
+                font-size: 14px;
+            }
+            
+            .location-address {
+                font-size: 12px;
+            }
+            
+            .emergency-call-btn {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .emergency-call-btn i {
+                font-size: 20px;
+            }
+            
+            .contact-options {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .contact-btn {
+                padding: 12px;
+            }
+        }
+        
+        .emergency-header {
+            background: white;
+            color: #333;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9ecef;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .emergency-header .back-btn {
+            background: none;
+            border: none;
+            color: #333;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .header-info {
+            flex: 1;
+            text-align: center;
+            margin: 0 10px;
+        }
+        
+        .route-summary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .route-summary i {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .eta-badge {
+            background: #ff3b30;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .map-container {
+            flex: 1;
+            background: #f0f0f0;
+            position: relative;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ddd" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+        
+        .route-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .route-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ff3b30;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .status-info {
+            flex: 1;
+        }
+        
+        .status-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .status-message {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .route-visual-simple {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .route-dot-simple {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .route-dot-simple.start {
+            background: #007aff;
+        }
+        
+        .route-dot-simple.end {
+            background: #ff3b30;
+        }
+        
+        .route-line-simple {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(to right, #007aff, #ff3b30);
+            border-radius: 1px;
+        }
+        
+        .route-info-simple {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+        
+        .bottom-panel {
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            max-height: 60%;
+            overflow-y: auto;
+        }
+        
+        .panel-handle {
+            width: 40px;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            margin: 12px auto 20px;
+        }
+        
+        .service-options {
+            padding: 0 20px 20px;
+        }
+        
+        .service-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .service-item:hover {
+            border-color: #ff3b30;
+            background: #fff8f8;
+        }
+        
+        .service-item.selected {
+            border-color: #ff3b30;
+            background: #fff8f8;
+        }
+        
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 20px;
+        }
+        
+        .service-icon.emergency {
+            background: #ff3b30;
+            color: white;
+        }
+        
+        .service-info {
+            flex: 1;
+        }
+        
+        .service-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .service-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.3;
+        }
+        
+        .service-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .service-price.emergency {
+            color: #ff3b30;
+        }
+        
+        /* 전문 의료진 강조 스타일 */
+        .medical-staff-highlight {
+            color: #ff3b30;
+            text-decoration: underline;
+            text-decoration-color: #ff3b30;
+            text-underline-offset: 2px;
+            font-weight: 600;
+        }
+        
+        /* 법령 안내 스타일 */
+        .legal-notice {
+            margin: 20px;
+            background: #fff8f3;
+            border: 1px solid #ffebcc;
+            border-radius: 12px;
+            padding: 16px;
+            animation: fadeInUp 0.3s ease;
+        }
+        
+        .notice-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff6b35;
+        }
+        
+        .notice-header i {
+            font-size: 18px;
+        }
+        
+        .notice-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+        
+        .notice-content p {
+            margin-bottom: 12px;
+        }
+        
+        .notice-content ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .notice-content li {
+            margin-bottom: 6px;
+            color: #666;
+        }
+        
+        .location-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .current-location {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .location-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007aff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+            font-size: 16px;
+        }
+        
+        .location-details {
+            flex: 1;
+        }
+        
+        .location-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .location-address {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .emergency-actions {
+            margin: 20px;
+        }
+        
+        .action-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .emergency-call-btn {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff3b30, #ff6b5a);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 59, 48, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .emergency-call-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 59, 48, 0.5);
+        }
+        
+        .emergency-call-btn i {
+            font-size: 24px;
+        }
+        
+        .contact-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .contact-btn {
+            padding: 15px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .contact-btn:hover {
+            border-color: #ff3b30;
+            color: #ff3b30;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.2);
+        }
+        
+        .contact-btn i {
+            font-size: 20px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .contact-btn span {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .emergency-info {
+            background-color: #fff3f3;
+            border: 1px solid #ffebee;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .emergency-info h6 {
+            color: #ff3b30;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .emergency-info ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #666;
+        }
+        
+        .emergency-info li {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .progress-steps {
+            background-color: white;
+            margin: 20px;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .steps-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .step-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+        
+        .step-item.active {
+            background-color: #fff3f3;
+            border: 1px solid #ffebee;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+        
+        .step-item.active .step-number {
+            background-color: #ff3b30;
+        }
+        
+        .step-text {
+            flex: 1;
+            font-size: 15px;
+            color: #333;
+        }
+        
+        .step-item.active .step-text {
+            font-weight: 600;
+            color: #ff3b30;
+        }
+        
+        .cancel-btn {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ff3b30;
+            border-radius: 12px;
+            background-color: white;
+            color: #ff3b30;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #ff3b30;
+            color: white;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .contact-options {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 실시간 추적 화면 스타일 */
+        .tracking-mode {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .tracking-header {
+            background: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .tracking-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .tracking-map {
+            flex: 1;
+            background: #f0f0f0;
+            position: relative;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ddd" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+        
+        .ambulance-marker {
+            position: absolute;
+            top: 30%;
+            left: 40%;
+            width: 60px;
+            height: 60px;
+            background: #ff3b30;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            animation: ambulancePulse 2s infinite;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+        }
+        
+        .destination-marker {
+            position: absolute;
+            top: 60%;
+            right: 30%;
+            width: 40px;
+            height: 40px;
+            background: #007aff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+        
+        @keyframes ambulancePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .tracking-info {
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        
+        .driver-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .driver-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #666;
+        }
+        
+        .driver-details {
+            flex: 1;
+        }
+        
+        .driver-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .driver-vehicle {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .contact-driver {
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .eta-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .eta-time {
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff3b30;
+            margin-bottom: 5px;
+        }
+        
+        .eta-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .tracking-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn.primary {
+            background: #ff3b30;
+            color: white;
+            border-color: #ff3b30;
+        }
+        
+        .action-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .action-btn.primary:hover {
+            background: #e6342a;
+        }
+
+        /* 운행 중 화면 스타일 */
+        .transport-mode {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 1100;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .transport-header {
+            background: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+        
+        .transport-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .transport-map {
+            flex: 1;
+            background: #f0f0f0;
+            position: relative;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ddd" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+        
+        .ambulance-moving {
+            position: absolute;
+            top: 40%;
+            left: 20%;
+            width: 50px;
+            height: 50px;
+            background: #ff3b30;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            animation: moveToHospital 15s linear infinite;
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+        }
+        
+        .hospital-marker {
+            position: absolute;
+            top: 20%;
+            right: 20%;
+            width: 50px;
+            height: 50px;
+            background: #34c759;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            animation: hospitalPulse 2s infinite;
+        }
+        
+        .route-path {
+            position: absolute;
+            top: 45%;
+            left: 25%;
+            right: 25%;
+            height: 3px;
+            background: linear-gradient(to right, #ff3b30, #34c759);
+            border-radius: 2px;
+            opacity: 0.7;
+        }
+        
+        @keyframes moveToHospital {
+            0% { left: 20%; }
+            100% { left: 70%; }
+        }
+        
+        @keyframes hospitalPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .transport-info {
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-height: 50%;
+            overflow-y: auto;
+        }
+        
+        .route-status {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .route-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #007aff;
+        }
+        
+        .route-dot {
+            width: 12px;
+            height: 12px;
+            background: #007aff;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .route-details {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .route-item {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .route-label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .route-value {
+            display: block;
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .transport-eta {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .hospital-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff3f3;
+            border-radius: 12px;
+            border: 1px solid #ffebee;
+        }
+        
+        .hospital-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .hospital-address {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .hospital-status {
+            font-size: 14px;
+            color: #ff3b30;
+            font-weight: 600;
+        }
+        
+        .transport-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 애니메이션 효과 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .emergency-status, .location-info, .action-card, .progress-steps {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .emergency-status {
+            animation-delay: 0.1s;
+        }
+        
+        .location-info {
+            animation-delay: 0.2s;
+        }
+        
+        .action-card {
+            animation-delay: 0.3s;
+        }
+        
+        .progress-steps {
+            animation-delay: 0.4s;
+        }
+        
+        /* 카카오T 스타일 경로 정보 */
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .route-from-to {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .route-from-to i {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .route-time-badge {
+            background: linear-gradient(135deg, #ff3b30, #ff6b5a);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .route-type {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .route-visual {
+            margin: 20px 0;
+        }
+        
+        .route-line {
+            position: relative;
+        }
+        
+        .route-start-point,
+        .route-end-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .route-path {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            padding-left: 8px;
+        }
+        
+        .route-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .route-dot.start {
+            background-color: #007aff;
+            border: 3px solid #e3f2fd;
+        }
+        
+        .route-dot.end {
+            background-color: #ff3b30;
+            border: 3px solid #ffebee;
+        }
+        
+        .route-line-connector {
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, #007aff, #ff3b30);
+            border-radius: 1px;
+        }
+        
+        .route-waypoint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .route-waypoint i {
+            color: #999;
+            font-size: 10px;
+        }
+        
+        .route-location {
+            flex: 1;
+        }
+        
+        .route-location .location-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        
+        .route-location .location-address {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.3;
+        }
+        
+        .route-details {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .route-info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+        }
+        
+        .route-info-item:not(:last-child) {
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .route-info-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007aff;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .route-info-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .route-info-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .route-info-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        /* 환자 정보 및 요구사항 스타일 */
+        .patient-info, .request-info {
+            margin: 20px;
+            padding: 0;
+        }
+        
+        .info-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-title i {
+            color: #ff3b30;
+            font-size: 16px;
+        }
+        
+        .patient-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .patient-row {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .patient-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .request-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .request-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .patient-label, .request-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .patient-input, .request-input {
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .patient-input:focus, .request-input:focus {
+            outline: none;
+            border-color: #ff3b30;
+            box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.1);
+        }
+        
+        .request-textarea {
+            padding: 12px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: white;
+            transition: all 0.2s ease;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .request-textarea:focus {
+            outline: none;
+            border-color: #ff3b30;
+            box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.1);
+        }
+        
+        .call-button {
+            margin: 20px;
+            padding: 16px;
+            background: #ff3b30;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .call-button:hover {
+            background: #e6342a;
+        }
+        
+        .call-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        /* 작은 화면 대응 */
+        @media (max-width: 411px) {
+            .patient-info, .request-info {
+                margin: 15px;
+                padding: 15px;
+            }
+            
+            .info-title {
+                font-size: 16px;
+            }
+            
+            .patient-input, .request-input, .request-textarea {
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+            
+            .request-textarea {
+                min-height: 70px;
+            }
+            
+            .route-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .route-time-badge {
+                align-self: flex-end;
+            }
+            
+            .route-from-to {
+                font-size: 15px;
+            }
+            
+            .route-location .location-name {
+                font-size: 15px;
+            }
+            
+            .route-location .location-address {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 응급 헤더 -->
+        <div class="emergency-header">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="header-info">
+                <div class="route-summary">
+                    <span id="headerFromName">출발지</span>
+                    <i class="fas fa-arrow-right"></i>
+                    <span id="headerToName">목적지</span>
+                </div>
+            </div>
+            <div class="eta-badge" id="headerETA">15분 예상</div>
+        </div>
+        
+        <!-- 지도 컨테이너 -->
+        <div class="map-container">
+            <!-- 경로 오버레이 -->
+            <div class="route-overlay">
+                <div class="route-status">
+                    <div class="status-icon">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <div class="status-info">
+                        <div class="status-title">응급 상황 대기 중</div>
+                        <div class="status-message">가장 가까운 구급차를 찾고 있습니다</div>
+                    </div>
+                </div>
+                <div class="route-visual-simple">
+                    <div class="route-dot-simple start"></div>
+                    <div class="route-line-simple"></div>
+                    <div class="route-dot-simple end"></div>
+                </div>
+                <div class="route-info-simple" id="routeInfoSimple">도착 15분 예상 • 8.5km</div>
+            </div>
+        </div>
+        
+        <!-- 하단 패널 -->
+        <div class="bottom-panel">
+            <div class="panel-handle"></div>
+            
+            <!-- 서비스 옵션 -->
+            <div class="service-options">
+                <div class="service-item selected" onclick="selectService('general')">
+                    <div class="service-icon">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <div class="service-info">
+                        <div class="service-name">일반구급차</div>
+                        <div class="service-desc">기본 응급처치 및 이송 서비스</div>
+                    </div>
+                </div>
+                
+                <div class="service-item" onclick="selectService('special')">
+                    <div class="service-icon emergency">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="service-info">
+                        <div class="service-name">특수구급차</div>
+                        <div class="service-desc"><span class="medical-staff-highlight">전문 의료진 탑승</span> 고급 응급의료 서비스</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 특수구급차 법령 안내 -->
+            <div class="legal-notice" id="legalNotice" style="display: none;">
+                <div class="notice-header">
+                    <i class="fas fa-info-circle"></i>
+                    <span>특수구급차 법령 안내</span>
+                </div>
+                <div class="notice-content">
+                    <p><strong>「응급의료에 관한 법률」 제48조 및 시행규칙 제39조</strong>에 따라 특수구급차에는 <strong>의사 또는 간호사</strong>가 반드시 탑승하도록 법적으로 정해져 있습니다.</p>
+                    <ul>
+                        <li>의료인(의사/간호사) 1명 이상 탑승 의무</li>
+                        <li>고급 응급처치 및 전문 의료서비스 제공</li>
+                        <li>중증 응급환자 대상 특화 서비스</li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- 환자 정보 -->
+            <div class="patient-info">
+                <div class="info-title">
+                    <i class="fas fa-user-injured"></i>
+                    환자 정보
+                </div>
+                <div class="patient-details">
+                    <div class="patient-row">
+                        <div class="patient-item">
+                            <span class="patient-label">환자명</span>
+                            <input type="text" id="patientName" class="patient-input" placeholder="환자 이름">
+                        </div>
+                        <div class="patient-item">
+                            <span class="patient-label">나이</span>
+                            <input type="number" id="patientAge" class="patient-input" placeholder="나이" min="0" max="120">
+                        </div>
+                    </div>
+                    <div class="patient-row">
+                        <div class="patient-item">
+                            <span class="patient-label">성별</span>
+                            <select id="patientGender" class="patient-input">
+                                <option value="">선택하세요</option>
+                                <option value="male">남성</option>
+                                <option value="female">여성</option>
+                            </select>
+                        </div>
+                        <div class="patient-item">
+                            <span class="patient-label">연락처</span>
+                            <input type="tel" id="patientPhone" class="patient-input" placeholder="010-0000-0000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 요구사항 -->
+            <div class="request-info">
+                <div class="info-title">
+                    <i class="fas fa-clipboard-list"></i>
+                    응급 상황 정보
+                </div>
+                <div class="request-details">
+                    <div class="request-item">
+                        <span class="request-label">응급 상황</span>
+                        <select id="emergencyType" class="request-input">
+                            <option value="">상황을 선택하세요</option>
+                            <option value="chest-pain">가슴 통증</option>
+                            <option value="breathing">호흡 곤란</option>
+                            <option value="unconscious">의식 잃음</option>
+                            <option value="bleeding">출혈</option>
+                            <option value="fracture">골절</option>
+                            <option value="burn">화상</option>
+                            <option value="poisoning">중독</option>
+                            <option value="seizure">경련</option>
+                            <option value="elderly-fall">노인 낙상</option>
+                            <option value="elderly-emergency">노인 응급상황</option>
+                            <option value="disability-assistance">장애인 응급지원</option>
+                            <option value="mobility-impaired">거동불편 환자</option>
+                            <option value="other">기타</option>
+                        </select>
+                    </div>
+                    <div class="request-item">
+                        <span class="request-label">증상 설명</span>
+                        <textarea id="symptoms" class="request-textarea" placeholder="환자의 현재 상태와 증상을 간단히 설명해주세요"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 호출 버튼 -->
+            <button class="call-button" id="emergencyCallBtn" onclick="confirmEmergencyCall()">
+                <i class="fas fa-phone"></i>
+                <span id="callButtonText">일반구급차 호출하기</span>
+            </button>
+        
+
+    </div>
+
+    <!-- 실시간 추적 화면 -->
+    <div class="tracking-mode" id="trackingMode">
+        <div class="tracking-header">
+            <button class="back-btn" onclick="closeTracking()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="tracking-title" id="trackingTitle">구급차 위치 추적</div>
+            <div></div>
+        </div>
+        
+        <div class="tracking-map">
+            <div class="ambulance-marker">
+                <i class="fas fa-ambulance"></i>
+            </div>
+            <div class="destination-marker">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+        </div>
+        
+        <div class="tracking-info">
+            <div class="driver-info">
+                <div class="driver-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="driver-details">
+                    <div class="driver-name" id="driverName">김응급 구조사</div>
+                    <div class="driver-vehicle" id="driverVehicle">서울 31 아 6887 • 아이오닉5</div>
+                </div>
+                <button class="contact-driver" onclick="contactDriver()">
+                    <i class="fas fa-phone"></i>
+                </button>
+            </div>
+            
+            <div class="eta-info">
+                <div class="eta-time" id="trackingETA">약 4분</div>
+                <div class="eta-desc">예상 도착시간</div>
+            </div>
+            
+            <div class="tracking-actions">
+                <button class="action-btn" onclick="sendMessage()">
+                    <i class="fas fa-comment"></i> 기사님께 메시지 보내기
+                </button>
+                <button class="action-btn primary" onclick="cancelTracking()">
+                    호출 취소
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 운행 중 화면 -->
+    <div class="transport-mode" id="transportMode">
+        <div class="transport-header">
+            <button class="back-btn" onclick="closeTransport()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="transport-title">병원으로 이송 중</div>
+            <div></div>
+        </div>
+        
+        <div class="transport-map">
+            <div class="ambulance-moving">
+                <i class="fas fa-ambulance"></i>
+            </div>
+            <div class="hospital-marker">
+                <i class="fas fa-hospital"></i>
+            </div>
+            <div class="route-path"></div>
+        </div>
+        
+        <div class="transport-info">
+            <div class="route-status">
+                <div class="route-indicator">
+                    <div class="route-dot"></div>
+                    <span>병원으로 이송 중</span>
+                </div>
+                <div class="route-details">
+                    <div class="route-item">
+                        <span class="route-label">거리</span>
+                        <span class="route-value" id="routeDistance">약 8.5km</span>
+                    </div>
+                    <div class="route-item">
+                        <span class="route-label">예상시간</span>
+                        <span class="route-value" id="routeTime">약 15분</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="transport-eta">
+                <div class="eta-time" id="transportETA">약 15분</div>
+                <div class="eta-desc">병원 도착 예정시간</div>
+            </div>
+            
+            <div class="hospital-info">
+                <div class="hospital-name" id="hospitalName">서울대학교병원</div>
+                <div class="hospital-address" id="hospitalAddress">서울시 종로구 대학로 101</div>
+                <div class="hospital-status">응급실 대기 중</div>
+            </div>
+            
+            <div class="transport-actions">
+                <button class="action-btn" onclick="contactHospital()">
+                    <i class="fas fa-hospital"></i> 병원에 연락하기
+                </button>
+                <button class="action-btn" onclick="contactFamily()">
+                    <i class="fas fa-users"></i> 보호자에게 알리기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 경로 정보
+        let routeData = null;
+        let emergencyCallActive = false;
+        let progressInterval = null;
+        
+        // 페이지 로드 시 경로 정보 가져오기
+        window.addEventListener('load', function() {
+            loadRouteInfo();
+        });
+        
+        // 경로 정보 로드
+        function loadRouteInfo() {
+            // URL 파라미터에서 경로 정보 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const departure = urlParams.get('departure');
+            const destination = urlParams.get('destination');
+            const duration = urlParams.get('duration');
+            const distance = urlParams.get('distance');
+            
+            // localStorage에서 경로 정보 가져오기 (URL 파라미터가 없는 경우)
+            const savedRouteData = localStorage.getItem('routeData');
+            
+            if (departure && destination) {
+                // URL 파라미터에서 정보 사용
+                updateRouteDisplay(
+                    decodeURIComponent(departure),
+                    decodeURIComponent(destination),
+                    duration ? decodeURIComponent(duration) : null,
+                    distance ? decodeURIComponent(distance) : null
+                );
+            } else if (savedRouteData) {
+                // localStorage에서 정보 사용
+                try {
+                    const routeInfo = JSON.parse(savedRouteData);
+                    updateRouteDisplay(
+                        routeInfo.departure || '출발지 정보 없음',
+                        routeInfo.destination || '목적지 정보 없음',
+                        routeInfo.duration || null,
+                        routeInfo.distance || null
+                    );
+                } catch (e) {
+                    console.error('경로 정보 파싱 오류:', e);
+                    setDefaultRouteInfo();
+                }
+            } else {
+                // 기본 정보 설정
+                setDefaultRouteInfo();
+            }
+        }
+        
+        // 경로 정보 표시 업데이트
+        function updateRouteDisplay(departure, destination, duration, distance) {
+            // 헤더 정보 업데이트
+            const headerFromNameEl = document.getElementById('headerFromName');
+            const headerToNameEl = document.getElementById('headerToName');
+            const headerETAEl = document.getElementById('headerETA');
+            const routeInfoSimpleEl = document.getElementById('routeInfoSimple');
+            
+            // 출발지 정보 처리
+            let fromName = '출발지';
+            if (departure.includes('|')) {
+                const [name] = departure.split('|');
+                fromName = name.length > 6 ? name.substring(0, 6) + '...' : name;
+            } else {
+                fromName = departure.length > 6 ? departure.substring(0, 6) + '...' : departure;
+            }
+            
+            // 목적지 정보 처리
+            let toName = '목적지';
+            if (destination.includes('|')) {
+                const [name] = destination.split('|');
+                toName = name.length > 6 ? name.substring(0, 6) + '...' : name;
+            } else {
+                toName = destination.length > 6 ? destination.substring(0, 6) + '...' : destination;
+            }
+            
+            // 헤더 업데이트
+            headerFromNameEl.textContent = fromName;
+            headerToNameEl.textContent = toName;
+            
+            const durationText = duration || '약 15분';
+            const distanceText = distance || '약 8.5km';
+            
+            headerETAEl.textContent = durationText + ' 예상';
+            routeInfoSimpleEl.textContent = `도착 ${durationText} 예상 • ${distanceText}`;
+            
+            // 경로 데이터 저장
+            routeData = {
+                departure: departure,
+                destination: destination,
+                duration: duration,
+                distance: distance
+            };
+        }
+        
+        // 기본 경로 정보 설정
+        function setDefaultRouteInfo() {
+            const headerFromNameEl = document.getElementById('headerFromName');
+            const headerToNameEl = document.getElementById('headerToName');
+            const headerETAEl = document.getElementById('headerETA');
+            const routeInfoSimpleEl = document.getElementById('routeInfoSimple');
+            
+            // 헤더 기본값
+            headerFromNameEl.textContent = '출발지';
+            headerToNameEl.textContent = '목적지';
+            headerETAEl.textContent = '경로 설정 필요';
+            routeInfoSimpleEl.textContent = 'home 페이지에서 경로를 설정해주세요';
+        }
+        
+        // 환자 정보 수집
+        function collectPatientInfo() {
+            return {
+                name: document.getElementById('patientName').value.trim(),
+                age: document.getElementById('patientAge').value,
+                gender: document.getElementById('patientGender').value,
+                phone: document.getElementById('patientPhone').value.trim()
+            };
+        }
+        
+        // 요구사항 정보 수집
+        function collectRequestInfo() {
+            return {
+                emergencyType: document.getElementById('emergencyType').value,
+                symptoms: document.getElementById('symptoms').value.trim()
+            };
+        }
+        
+        // 입력 정보 검증
+        function validateEmergencyInfo() {
+            const patientInfo = collectPatientInfo();
+            const requestInfo = collectRequestInfo();
+            
+            // 필수 정보가 없는 경우 임의 정보 생성 (테스트용)
+            if (!patientInfo.name) {
+                const testNames = ['김환자', '이응급', '박급한', '최위험', '정긴급'];
+                const randomName = testNames[Math.floor(Math.random() * testNames.length)];
+                document.getElementById('patientName').value = randomName;
+            }
+            
+            if (!requestInfo.emergencyType) {
+                const emergencyTypes = ['chest-pain', 'breathing', 'unconscious', 'bleeding', 'fracture'];
+                const randomType = emergencyTypes[Math.floor(Math.random() * emergencyTypes.length)];
+                document.getElementById('emergencyType').value = randomType;
+            }
+            
+            if (!requestInfo.symptoms) {
+                const testSymptoms = [
+                    '갑작스러운 가슴 통증으로 호흡이 어려움',
+                    '의식을 잃고 쓰러진 상태',
+                    '심한 출혈이 멈추지 않음',
+                    '골절로 인한 심한 통증',
+                    '호흡곤란 증상이 지속됨'
+                ];
+                const randomSymptom = testSymptoms[Math.floor(Math.random() * testSymptoms.length)];
+                document.getElementById('symptoms').value = randomSymptom;
+            }
+            
+            // 나이와 성별도 임의로 설정
+            if (!document.getElementById('patientAge').value) {
+                const randomAge = Math.floor(Math.random() * 60) + 20; // 20-80세
+                document.getElementById('patientAge').value = randomAge;
+            }
+            
+            if (!document.getElementById('patientGender').value) {
+                const genders = ['male', 'female'];
+                const randomGender = genders[Math.floor(Math.random() * genders.length)];
+                document.getElementById('patientGender').value = randomGender;
+            }
+            
+            if (!document.getElementById('patientPhone').value) {
+                document.getElementById('patientPhone').value = '010-1234-5678';
+            }
+            
+            return true;
+        }
+        
+        // 응급 호출 확인
+        function confirmEmergencyCall() {
+            console.log('confirmEmergencyCall 함수 호출됨');
+            
+            if (emergencyCallActive) {
+                alert('이미 응급 호출이 진행 중입니다.');
+                return;
+            }
+            
+            // 경로 정보가 없는 경우 임의 경로 설정
+            if (!routeData || routeData.departure === '출발지' || routeData.destination === '목적지') {
+                console.log('임의 경로 설정 중...');
+                setRandomRoute();
+            }
+            
+            // 입력 정보 검증
+            console.log('입력 정보 검증 중...');
+            if (!validateEmergencyInfo()) {
+                return;
+            }
+            
+            const patientInfo = collectPatientInfo();
+            const requestInfo = collectRequestInfo();
+            
+            // 선택된 서비스 타입 확인
+            const selectedService = document.querySelector('.service-item.selected');
+            const isSpecialAmbulance = selectedService && selectedService.querySelector('.service-name').textContent === '특수구급차';
+            const serviceType = isSpecialAmbulance ? '특수구급차' : '일반구급차';
+            
+            // 응급 상황에 따른 메시지 생성
+            const emergencyTypeText = getEmergencyTypeText(requestInfo.emergencyType);
+            
+            const confirmMessage = 
+                `${serviceType}를 호출하시겠습니까?\n\n` +
+                `환자: ${patientInfo.name}${patientInfo.age ? ` (${patientInfo.age}세)` : ''}\n` +
+                `상황: ${emergencyTypeText}\n` +
+                `증상: ${requestInfo.symptoms.substring(0, 50)}${requestInfo.symptoms.length > 50 ? '...' : ''}\n\n` +
+                `• ${serviceType}가 출동합니다\n` +
+                (isSpecialAmbulance ? '• 전문 의료진(의사/간호사) 탑승\n' : '') +
+                '• 예상 도착시간: 5-15분\n' +
+                '• 응급상황이 아닌 경우 취소해주세요';
+            
+            const confirmed = confirm(confirmMessage);
+            
+            if (confirmed) {
+                startEmergencyCall(serviceType);
+            }
+        }
+        
+        // 임의 경로 설정
+        function setRandomRoute() {
+            const locations = [
+                { name: '강남역', address: '서울시 강남구 강남대로 396' },
+                { name: '홍대입구역', address: '서울시 마포구 양화로 160' },
+                { name: '명동역', address: '서울시 중구 명동길 26' },
+                { name: '이태원역', address: '서울시 용산구 이태원로 177' },
+                { name: '신촌역', address: '서울시 서대문구 신촌로 120' },
+                { name: '건대입구역', address: '서울시 광진구 능동로 120' },
+                { name: '잠실역', address: '서울시 송파구 올림픽로 240' },
+                { name: '여의도역', address: '서울시 영등포구 여의공원로 101' }
+            ];
+            
+            const hospitals = [
+                { name: '서울대학교병원', address: '서울시 종로구 대학로 101' },
+                { name: '삼성서울병원', address: '서울시 강남구 일원로 81' },
+                { name: '세브란스병원', address: '서울시 서대문구 연세로 50-1' },
+                { name: '서울아산병원', address: '서울시 송파구 올림픽로43길 88' },
+                { name: '고려대학교의료원', address: '서울시 성북구 고려대로 73' }
+            ];
+            
+            // 랜덤 출발지와 목적지 선택
+            const randomDeparture = locations[Math.floor(Math.random() * locations.length)];
+            const randomDestination = hospitals[Math.floor(Math.random() * hospitals.length)];
+            
+            // 랜덤 시간과 거리 생성
+            const randomMinutes = Math.floor(Math.random() * 20) + 5; // 5-25분
+            const randomDistance = (Math.random() * 15 + 2).toFixed(1); // 2.0-17.0km
+            
+            // 경로 데이터 설정
+            routeData = {
+                departure: `${randomDeparture.name}|${randomDeparture.address}`,
+                destination: `${randomDestination.name}|${randomDestination.address}`,
+                duration: `약 ${randomMinutes}분`,
+                distance: `약 ${randomDistance}km`
+            };
+            
+            // 화면에 경로 정보 업데이트
+            updateRouteDisplay(
+                routeData.departure,
+                routeData.destination,
+                routeData.duration,
+                routeData.distance
+            );
+            
+            // 상태 메시지 업데이트
+            const statusMessage = document.querySelector('.status-message');
+            statusMessage.innerHTML = `경로가 설정되었습니다.<br>${randomDeparture.name} → ${randomDestination.name}`;
+        }
+        
+        // 응급 상황 텍스트 변환
+        function getEmergencyTypeText(type) {
+            const types = {
+                'chest-pain': '가슴 통증',
+                'breathing': '호흡 곤란',
+                'unconscious': '의식 잃음',
+                'bleeding': '출혈',
+                'fracture': '골절',
+                'burn': '화상',
+                'poisoning': '중독',
+                'seizure': '경련',
+                'elderly-fall': '노인 낙상',
+                'elderly-emergency': '노인 응급상황',
+                'disability-assistance': '장애인 응급지원',
+                'mobility-impaired': '거동불편 환자',
+                'other': '기타'
+            };
+            return types[type] || '응급상황';
+        }
+        
+        // 서비스 선택
+        function selectService(serviceType) {
+            const serviceItems = document.querySelectorAll('.service-item');
+            const legalNotice = document.getElementById('legalNotice');
+            const callButtonText = document.getElementById('callButtonText');
+            
+            serviceItems.forEach(item => item.classList.remove('selected'));
+            
+            if (serviceType === 'general') {
+                serviceItems[0].classList.add('selected');
+                legalNotice.style.display = 'none';
+                callButtonText.textContent = '일반구급차 호출하기';
+            } else if (serviceType === 'special') {
+                serviceItems[1].classList.add('selected');
+                legalNotice.style.display = 'block';
+                callButtonText.textContent = '특수구급차 호출하기';
+            }
+        }
+        
+        // 응급 호출 시작
+        function startEmergencyCall(serviceType = '일반구급차') {
+            emergencyCallActive = true;
+            
+            // 환자 정보와 요구사항 저장
+            const patientInfo = collectPatientInfo();
+            const requestInfo = collectRequestInfo();
+            const emergencyData = {
+                patient: patientInfo,
+                request: requestInfo,
+                route: routeData,
+                serviceType: serviceType,
+                timestamp: new Date().toISOString(),
+                callId: generateCallId()
+            };
+            
+            // 응급 호출 데이터 저장
+            localStorage.setItem('emergencyCallData', JSON.stringify(emergencyData));
+            
+            // 상태 업데이트
+            const statusTitle = document.querySelector('.status-title');
+            const statusMessage = document.querySelector('.status-message');
+            const statusIcon = document.querySelector('.status-icon i');
+            
+            statusTitle.textContent = `${serviceType} 호출 접수됨`;
+            statusMessage.innerHTML = `환자: ${patientInfo.name}<br>${serviceType}를 배정하고 있습니다.`;
+            statusIcon.className = 'fas fa-spinner fa-spin';
+            
+            // 입력 필드 비활성화
+            disableInputFields();
+            
+            // 호출 버튼 비활성화
+            const callBtn = document.getElementById('emergencyCallBtn');
+            callBtn.disabled = true;
+            callBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 호출 진행 중...';
+            
+            // 2초 후 실시간 추적 화면 표시
+            setTimeout(() => {
+                showTracking(serviceType);
+            }, 2000);
+        }
+        
+        // 호출 ID 생성
+        function generateCallId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `EMG${timestamp}${random}`;
+        }
+        
+        // 입력 필드 비활성화
+        function disableInputFields() {
+            const inputs = document.querySelectorAll('.patient-input, .request-input, .request-textarea');
+            inputs.forEach(input => {
+                input.disabled = true;
+                input.style.backgroundColor = '#f5f5f5';
+                input.style.color = '#999';
+            });
+        }
+        
+        // 입력 필드 활성화
+        function enableInputFields() {
+            const inputs = document.querySelectorAll('.patient-input, .request-input, .request-textarea');
+            inputs.forEach(input => {
+                input.disabled = false;
+                input.style.backgroundColor = '#fafafa';
+                input.style.color = '#333';
+            });
+        }
+        
+
+        
+        // 운행 시작 화면 표시
+        function showTransportScreen() {
+            const transportMode = document.getElementById('transportMode');
+            const trackingMode = document.getElementById('trackingMode');
+            const hospitalName = document.getElementById('hospitalName');
+            const hospitalAddress = document.getElementById('hospitalAddress');
+            const transportETA = document.getElementById('transportETA');
+            const routeDistance = document.getElementById('routeDistance');
+            const routeTime = document.getElementById('routeTime');
+            
+            // 추적 화면 숨기기
+            trackingMode.style.display = 'none';
+            
+            // 목적지 병원 정보 설정 (routeData에서 가져오기)
+            if (routeData && routeData.destination) {
+                const [name, address] = routeData.destination.split('|');
+                hospitalName.textContent = name || '목적지 병원';
+                hospitalAddress.textContent = address || '병원 주소';
+            }
+            
+            // 경로 정보 설정
+            if (routeData) {
+                routeDistance.textContent = routeData.distance || '약 8.5km';
+                routeTime.textContent = '약 15분';
+            }
+            
+            // 운행 화면 표시
+            transportMode.style.display = 'flex';
+            transportMode.style.flexDirection = 'column';
+            
+            // 병원까지 ETA 카운트다운 시작
+            startTransportCountdown();
+        }
+        
+        // 운행 중 화면 닫기
+        function closeTransport() {
+            const transportMode = document.getElementById('transportMode');
+            transportMode.style.display = 'none';
+            
+            // 메인 화면으로 돌아가기
+            const callBtn = document.getElementById('emergencyCallBtn');
+            const callButtonText = document.getElementById('callButtonText');
+            const selectedService = document.querySelector('.service-item.selected');
+            const isSpecialAmbulance = selectedService && selectedService.querySelector('.service-name').textContent === '특수구급차';
+            const serviceType = isSpecialAmbulance ? '특수구급차' : '일반구급차';
+            
+            callBtn.disabled = false;
+            callButtonText.textContent = `${serviceType} 호출하기`;
+            emergencyCallActive = false;
+        }
+        
+        // 병원까지 ETA 카운트다운
+        function startTransportCountdown() {
+            let minutes = 15;
+            const transportETA = document.getElementById('transportETA');
+            
+            const countdown = setInterval(() => {
+                minutes--;
+                if (minutes > 0) {
+                    transportETA.textContent = `약 ${minutes}분`;
+                } else {
+                    transportETA.textContent = '병원 도착';
+                    clearInterval(countdown);
+                    
+                    // 3초 후 완료 메시지
+                    setTimeout(() => {
+                        alert('병원에 안전하게 도착했습니다!\n응급실에서 치료를 받으시기 바랍니다.');
+                        closeTransport();
+                    }, 3000);
+                }
+            }, 1000); // 1초마다 1분씩 감소
+        }
+        
+
+        
+        // 병원에 연락하기
+        function contactHospital() {
+            alert('병원 응급실에 연락합니다.\n📞 02-2072-2345\n\n환자 정보가 전달되었습니다.');
+        }
+        
+        // 보호자에게 알리기
+        function contactFamily() {
+            const message = prompt('보호자에게 보낼 메시지를 입력하세요:', '현재 병원으로 이송 중입니다. 걱정하지 마세요.');
+            if (message) {
+                alert(`보호자에게 메시지가 전송되었습니다:\n"${message}"`);
+            }
+        }
+        
+        // 응급 호출 완료 (더 이상 사용하지 않음)
+        function completeEmergencyCall(serviceType = '일반구급차') {
+            // showTransportScreen으로 대체됨
+        }
+        
+        // 실시간 추적 화면 표시
+        function showTracking(serviceType = '일반구급차') {
+            const trackingMode = document.getElementById('trackingMode');
+            const trackingTitle = document.getElementById('trackingTitle');
+            const driverName = document.getElementById('driverName');
+            const driverVehicle = document.getElementById('driverVehicle');
+            const trackingETA = document.getElementById('trackingETA');
+            
+            // 서비스 타입에 따른 정보 설정
+            if (serviceType === '특수구급차') {
+                trackingTitle.textContent = '특수구급차 위치 추적';
+                driverName.textContent = '박의료진 간호사';
+                driverVehicle.textContent = '서울 31 아 6887 • 특수구급차';
+            } else {
+                trackingTitle.textContent = '일반구급차 위치 추적';
+                driverName.textContent = '김응급 기사님';
+                driverVehicle.textContent = '서울 31 아 6887 • 일반구급차';
+            }
+            
+            trackingETA.textContent = '약 30분';
+            trackingMode.style.display = 'flex';
+            trackingMode.style.flexDirection = 'column';
+            
+            // ETA 카운트다운 시작
+            startETACountdown();
+        }
+        
+        // 실시간 추적 화면 닫기
+        function closeTracking() {
+            const trackingMode = document.getElementById('trackingMode');
+            trackingMode.style.display = 'none';
+        }
+        
+        // ETA 카운트다운
+        function startETACountdown() {
+            let minutes = 30;
+            const trackingETA = document.getElementById('trackingETA');
+            
+            const countdown = setInterval(() => {
+                minutes--;
+                if (minutes > 0) {
+                    trackingETA.textContent = `약 ${minutes}분`;
+                } else {
+                    trackingETA.textContent = '도착 완료';
+                    clearInterval(countdown);
+                    
+                    // 3초 후 운행 시작 화면으로 전환
+                    setTimeout(() => {
+                        showTransportScreen();
+                    }, 3000);
+                }
+            }, 1000); // 1초마다 1분씩 감소 (시연용)
+        }
+        
+        // 기사님께 연락
+        function contactDriver() {
+            alert('기사님께 전화를 겁니다.\n📞 010-1234-5678');
+        }
+        
+        // 메시지 보내기
+        function sendMessage() {
+            const message = prompt('기사님께 보낼 메시지를 입력하세요:', '곧 나갑니다. 잠시만 기다려주세요.');
+            if (message) {
+                alert(`메시지가 전송되었습니다:\n"${message}"`);
+            }
+        }
+        
+        // 추적 중 호출 취소
+        function cancelTracking() {
+            const confirmed = confirm('구급차 호출을 취소하시겠습니까?\n이미 출동 중인 구급차가 있습니다.');
+            if (confirmed) {
+                closeTracking();
+                alert('호출이 취소되었습니다.');
+                
+                // 상태 초기화
+                emergencyCallActive = false;
+                const callBtn = document.getElementById('emergencyCallBtn');
+                const callButtonText = document.getElementById('callButtonText');
+                const selectedService = document.querySelector('.service-item.selected');
+                const isSpecialAmbulance = selectedService && selectedService.querySelector('.service-name').textContent === '특수구급차';
+                const serviceType = isSpecialAmbulance ? '특수구급차' : '일반구급차';
+                
+                callBtn.disabled = false;
+                callButtonText.textContent = `${serviceType} 호출하기`;
+                
+                // 상태 메시지 초기화
+                const statusTitle = document.querySelector('.status-title');
+                const statusMessage = document.querySelector('.status-message');
+                const statusIcon = document.querySelector('.status-icon i');
+                
+                statusTitle.textContent = '호출이 취소되었습니다';
+                statusMessage.innerHTML = '응급 호출이 취소되었습니다.<br>필요시 다시 호출해주세요.';
+                statusIcon.className = 'fas fa-times-circle';
+            }
+        }
+        
+        // 응급 호출 취소
+        function cancelEmergencyCall() {
+            if (!emergencyCallActive) {
+                goBack();
+                return;
+            }
+            
+            const confirmed = confirm(
+                '응급 호출을 취소하시겠습니까?\n\n' +
+                '이미 출동 중인 구급차가 있을 수 있습니다.\n' +
+                '정말 취소하시겠습니까?'
+            );
+            
+            if (confirmed) {
+                // 진행 상황 초기화
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                }
+                
+                emergencyCallActive = false;
+                
+                // 상태 초기화
+                const statusTitle = document.querySelector('.status-title');
+                const statusMessage = document.querySelector('.status-message');
+                const statusIcon = document.querySelector('.status-icon i');
+                
+                statusTitle.textContent = '호출이 취소되었습니다';
+                statusMessage.innerHTML = '응급 호출이 취소되었습니다.<br>필요시 다시 호출해주세요.';
+                statusIcon.className = 'fas fa-times-circle';
+                
+                // 단계 초기화
+                const steps = document.querySelectorAll('.step-item');
+                steps.forEach((step, index) => {
+                    step.classList.remove('active');
+                    if (index === 0) {
+                        step.classList.add('active');
+                    }
+                });
+                
+                // 호출 버튼 활성화
+                const callBtn = document.getElementById('emergencyCallBtn');
+                const callButtonText = document.getElementById('callButtonText');
+                const selectedService = document.querySelector('.service-item.selected');
+                const isSpecialAmbulance = selectedService && selectedService.querySelector('.service-name').textContent === '특수구급차';
+                const serviceType = isSpecialAmbulance ? '특수구급차' : '일반구급차';
+                
+                callBtn.disabled = false;
+                callButtonText.textContent = `${serviceType} 호출하기`;
+                
+                // 입력 필드 활성화
+                enableInputFields();
+                
+                // 저장된 응급 호출 데이터 삭제
+                localStorage.removeItem('emergencyCallData');
+                
+                setTimeout(() => {
+                    goBack();
+                }, 2000);
+            }
+        }
+        
+        // 뒤로가기
+        function goBack() {
+            if (emergencyCallActive) {
+                const confirmed = confirm('응급 호출이 진행 중입니다. 정말 나가시겠습니까?');
+                if (!confirmed) {
+                    return;
+                }
+            }
+            
+            window.history.back();
+        }
+        
+        // 페이지 이탈 방지 (응급 호출 중일 때)
+        window.addEventListener('beforeunload', function(e) {
+            if (emergencyCallActive) {
+                e.preventDefault();
+                e.returnValue = '응급 호출이 진행 중입니다. 정말 나가시겠습니까?';
+            }
+        });
+        
+        // 페이지 로드 시 인증 체크
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kakao SDK 초기화
+            if (window.Kakao && !Kakao.isInitialized()) {
+                Kakao.init('ae9cce23e8367af0be888d1657d525e7');
+            }
+            
+            // 앱 타입 체크
+            const appType = localStorage.getItem('appType');
+            if (appType === 'admin') {
+                // 운영자용 UI 표시
+                showAdminInterface();
+            } else {
+                // 고객용 UI 표시
+                loadRouteInfo();
+            }
+        });
+        
+        // 운영자용 인터페이스 표시
+        function showAdminInterface() {
+            const statusMessage = document.querySelector('.status-message');
+            statusMessage.innerHTML = '운영자 모드로 접속하셨습니다.<br>테스트용 응급호출을 실행할 수 있습니다.';
+            
+            const statusTitle = document.querySelector('.status-title');
+            statusTitle.textContent = '운영자 테스트 모드';
+            
+            const statusIcon = document.querySelector('.status-icon i');
+            statusIcon.className = 'fas fa-user-shield';
+            
+            // 헤더 정보 설정
+            const headerFromNameEl = document.getElementById('headerFromName');
+            const headerToNameEl = document.getElementById('headerToName');
+            const headerETAEl = document.getElementById('headerETA');
+            const routeInfoSimpleEl = document.getElementById('routeInfoSimple');
+            
+            headerFromNameEl.textContent = '운영센터';
+            headerToNameEl.textContent = '테스트지역';
+            headerETAEl.textContent = '테스트 모드';
+            routeInfoSimpleEl.textContent = '운영자 테스트 환경';
+            
+            // 운영자용 경로 데이터 설정
+            routeData = {
+                departure: '운영자 센터|서울시 중구 명동 123-45',
+                destination: '테스트 지역|서울시 강남구 테헤란로 456',
+                duration: '약 12분',
+                distance: '약 5.2km'
+            };
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,202 @@
+/* 프로필 페이지 스타일 */
+
+.header.profile {
+    background-color: white;
+    color: #333;
+    justify-content: center;
+}
+
+/* 메인 컨텐츠 */
+.content.profile {
+    background-color: #f2f2f7;
+}
+
+/* 프로필 섹션 */
+.profile-section {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    overflow: hidden;
+}
+
+.profile-avatar i {
+    font-size: 36px;
+    color: #bbb;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.profile-phone {
+    font-size: 14px;
+    color: #8e8e93;
+}
+
+.edit-profile-btn {
+    background-color: #f2f2f7;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+}
+
+/* 메뉴 리스트 */
+.menu-list {
+    list-style: none;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.menu-item:last-child {
+    border-bottom: none;
+}
+
+.menu-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+
+.menu-icon.red {
+    background-color: #ffebee;
+    color: #ff3b30;
+}
+
+.menu-icon.blue {
+    background-color: #e3f2fd;
+    color: #007aff;
+}
+
+.menu-icon.green {
+    background-color: #e8f5e9;
+    color: #34c759;
+}
+
+.menu-icon.purple {
+    background-color: #f3e5f5;
+    color: #9c27b0;
+}
+
+.menu-icon.orange {
+    background-color: #fff3e0;
+    color: #ff9500;
+}
+
+.menu-icon i {
+    font-size: 16px;
+}
+
+.menu-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.menu-title {
+    font-size: 16px;
+}
+
+.menu-arrow {
+    color: #c7c7cc;
+}
+
+.menu-value {
+    font-size: 14px;
+    color: #8e8e93;
+}
+
+/* 로그아웃 버튼 */
+.logout-btn {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+    color: #ff3b30;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* 토글 스위치 */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e4e4e4;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #34c759;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+} 

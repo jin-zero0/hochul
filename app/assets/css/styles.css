@@ -1,0 +1,213 @@
+/* 공통 스타일 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+}
+
+body {
+    background-color: #E8F1FF;
+    color: #1A365D;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.mobile-container {
+    position: relative;
+    width: 411px;
+    height: 731px;
+    margin: 20px auto;
+    background-color: #FFFFFF;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 12px 24px rgba(0, 82, 204, 0.1);
+}
+
+/* 작은 Android 화면 (360x640) 대응 */
+@media (max-width: 411px) {
+    .mobile-container {
+        width: 360px;
+        height: 640px;
+        margin: 10px auto;
+        border-radius: 20px;
+    }
+}
+
+/* 상단 헤더 */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    height: 60px;
+    background-color: #007AFF;
+    color: white;
+    border-bottom: 1px solid #0055CC;
+}
+
+.header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: white;
+}
+
+/* 메인 컨텐츠 */
+.content {
+    height: calc(100% - 60px - 80px);
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #F8FBFF;
+}
+
+/* 폼 요소 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1A365D;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #B3D4FF;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: white;
+}
+
+.form-input:focus {
+    border-color: #007AFF;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+}
+
+.form-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #B3D4FF;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: white;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23007AFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+/* 하단 버튼 */
+.bottom-button {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 15px 20px;
+    background-color: #FFFFFF;
+    border-top: 1px solid #E1EEFF;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 하단 네비게이션 */
+.bottom-nav {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    background-color: #FFFFFF;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid #E1EEFF;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #6B8CFF;
+    font-size: 12px;
+}
+
+.nav-item.active {
+    color: #007AFF;
+}
+
+.nav-item i {
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+
+/* 색상 테마 */
+.theme-red {
+    color: white;
+    background-color: #007AFF;
+}
+
+.theme-blue {
+    color: white;
+    background-color: #0055CC;
+}
+
+/* 버튼 스타일 */
+.btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+}
+
+.btn-primary {
+    background-color: #007AFF;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0055CC;
+}
+
+.btn-secondary {
+    background-color: #0055CC;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #0044AA;
+}
+
+.btn-outline {
+    background-color: white;
+    border: 1px solid #007AFF;
+    color: #007AFF;
+}
+
+.btn-outline:hover {
+    background-color: #F0F8FF;
+    border-color: #0055CC;
+    color: #0055CC;
+} 

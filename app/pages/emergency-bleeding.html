@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출혈 응급처치</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .content {
+            padding: 20px;
+            height: calc(100% - 60px - 80px);
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+
+        .step-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: #ff3b30;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .step-desc {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .step-image {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .warning-box {
+            background-color: #ffebee;
+            border-left: 4px solid #ff3b30;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-title {
+            color: #ff3b30;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-text {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .bleeding-type {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .type-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- 상단 헤더 -->
+        <div class="header">
+            <a href="ai.html" class="back-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <h1>출혈</h1>
+            <div style="width: 18px;"></div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="content">
+            <div class="step-container">
+                <div class="step-number">1</div>
+                <div class="step-title">출혈 종류 확인</div>
+                <div class="bleeding-type">
+                    <div class="type-title">동맥 출혈</div>
+                    <div class="step-desc">
+                        • 밝은 붉은색 혈액<br>
+                        • 혈액이 분출됨<br>
+                        • 맥박에 맞춰 출혈
+                    </div>
+                </div>
+                <div class="bleeding-type">
+                    <div class="type-title">정맥 출혈</div>
+                    <div class="step-desc">
+                        • 어두운 붉은색 혈액<br>
+                        • 지속적으로 흐름<br>
+                        • 비교적 느린 속도
+                    </div>
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-tint fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-number">2</div>
+                <div class="step-title">응급처치 방법</div>
+                <div class="step-desc">
+                    1. 장갑을 끼고 감염을 예방합니다.<br>
+                    2. 상처 부위를 깨끗한 거즈나 수건으로 직접 압박합니다.<br>
+                    3. 출혈 부위를 심장보다 높게 올립니다.<br>
+                    4. 지혈대는 마지막 수단으로만 사용합니다.
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-hand-holding-medical fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-number">3</div>
+                <div class="step-title">지혈대 사용법</div>
+                <div class="step-desc">
+                    1. 지혈대는 상처에서 5-7cm 위에 위치시킵니다.<br>
+                    2. 지혈대를 단단히 조입니다.<br>
+                    3. 사용 시간을 기록합니다.<br>
+                    4. 1-2시간마다 5분간 풀어줍니다.
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-band-aid fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    주의사항
+                </div>
+                <div class="warning-text">
+                    • 심한 출혈 시 즉시 119에 신고합니다.<br>
+                    • 상처에 이물질이 박혀있으면 제거하지 않습니다.<br>
+                    • 지혈대 사용 시간을 반드시 기록합니다.<br>
+                    • 응급처치 후에도 의료진의 진찰이 필요합니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 네비게이션 -->
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>홈</span>
+            </a>
+            <a href="history.html" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>이용내역</span>
+            </a>
+            <a href="ai.html" class="nav-item active">
+                <i class="fas fa-heartbeat"></i>
+                <span>응급처치</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>프로필</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html> 

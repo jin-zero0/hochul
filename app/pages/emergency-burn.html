@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>화상 응급처치</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .content {
+            padding: 20px;
+            height: calc(100% - 60px - 80px);
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+
+        .step-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: #ff9500;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .step-desc {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .step-image {
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .warning-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9500;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-title {
+            color: #ff9500;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-text {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .burn-degree {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .degree-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- 상단 헤더 -->
+        <div class="header">
+            <a href="ai.html" class="back-btn">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <h1>화상</h1>
+            <div style="width: 18px;"></div>
+        </div>
+
+        <!-- 메인 컨텐츠 -->
+        <div class="content">
+            <div class="step-container">
+                <div class="step-number">1</div>
+                <div class="step-title">화상 정도 확인</div>
+                <div class="burn-degree">
+                    <div class="degree-title">1도 화상</div>
+                    <div class="step-desc">
+                        • 피부가 붉어짐<br>
+                        • 통증과 따끔거림<br>
+                        • 피부가 건조함
+                    </div>
+                </div>
+                <div class="burn-degree">
+                    <div class="degree-title">2도 화상</div>
+                    <div class="step-desc">
+                        • 물집이 생김<br>
+                        • 심한 통증<br>
+                        • 피부가 붉고 부어오름
+                    </div>
+                </div>
+                <div class="burn-degree">
+                    <div class="degree-title">3도 화상</div>
+                    <div class="step-desc">
+                        • 피부가 하얗거나 검게 변함<br>
+                        • 통증이 없거나 둔함<br>
+                        • 피부가 딱딱해짐
+                    </div>
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-fire fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-number">2</div>
+                <div class="step-title">응급처치 방법</div>
+                <div class="step-desc">
+                    1. 화상 부위를 즉시 찬물(15-20℃)에 15-20분간 담급니다.<br>
+                    2. 화상 부위의 옷을 벗기지 않습니다.<br>
+                    3. 물집은 터뜨리지 않습니다.<br>
+                    4. 화상 부위를 깨끗한 거즈로 덮습니다.
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-hand-holding-water fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step-number">3</div>
+                <div class="step-title">화상 면적 계산</div>
+                <div class="step-desc">
+                    • 손바닥 크기 = 전체 체표면적의 1%<br>
+                    • 2도 이상 화상이 10% 이상<br>
+                    • 3도 화상이 5% 이상<br>
+                    • 얼굴, 손, 발, 생식기 부위 화상<br>
+                    → 즉시 119에 신고
+                </div>
+                <div class="step-image">
+                    <i class="fas fa-ruler fa-3x"></i>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    주의사항
+                </div>
+                <div class="warning-text">
+                    • 얼음이나 얼음물을 직접 사용하지 않습니다.<br>
+                    • 화상 부위에 치약, 소금, 기름 등을 바르지 않습니다.<br>
+                    • 화상 부위를 문지르거나 긁지 않습니다.<br>
+                    • 심한 화상은 즉시 119에 신고하고 의료기관으로 이송합니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 네비게이션 -->
+        <div class="bottom-nav">
+            <a href="home.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>홈</span>
+            </a>
+            <a href="history.html" class="nav-item">
+                <i class="fas fa-history"></i>
+                <span>이용내역</span>
+            </a>
+            <a href="ai.html" class="nav-item active">
+                <i class="fas fa-heartbeat"></i>
+                <span>응급처치</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>프로필</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html> 
