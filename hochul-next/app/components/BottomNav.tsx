@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Calendar, Clock, User, HeartHandshake } from 'lucide-react';
+import { Home, Calendar, Clock, User, HeartHandshake, Bot } from 'lucide-react';
 
 interface NavItem {
   href: string;
@@ -32,6 +32,11 @@ const navItems: NavItem[] = [
     label: '이력'
   },
   {
+    href: '/ai',
+    icon: <Bot size={20} />,
+    label: 'AI'
+  },
+  {
     href: '/profile',
     icon: <User size={20} />,
     label: '프로필'
@@ -51,7 +56,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-all ${
+              className={`flex flex-col items-center justify-center py-2 px-2 rounded-lg transition-all ${
                 isActive
                   ? 'text-red-500 bg-red-50'
                   : 'text-gray-500 hover:text-gray-700'
