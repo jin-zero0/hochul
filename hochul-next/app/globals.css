@@ -29,6 +29,357 @@ body {
 @tailwind components;
 @tailwind utilities;
 
+/* 기본 리셋 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* HTML과 Body */
+html {
+  position: fixed;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  position: fixed;
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+  background-color: #f8f9fa;
+  color: #333;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga', 'kern';
+}
+
+/* 앱 컨테이너 */
+.app-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background-color: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  
+  /* Safe area 대응 */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 상단 헤더 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  height: 60px;
+  background: linear-gradient(to right, #ff3b30, #ff4840);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+  position: relative;
+}
+
+/* 메인 컨텐츠 영역 */
+main {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+  .app-container {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* 버튼 기본 스타일 */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 입력 필드 기본 스타일 */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 16px; /* iOS 줌 방지 */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 유틸리티 클래스 */
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* 그림자 효과 */
+.shadow-soft {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.shadow-medium {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.shadow-hard {
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* 포커스 스타일 */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #ff3b30;
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1);
+}
+
+/* 로딩 스피너 */
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #ff3b30;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+/* 터치 하이라이트 제거 */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* 텍스트 선택 비활성화 (필요한 경우) */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 모바일 컨테이너 스타일 */
+.app-container {
+  position: relative;
+  width: 411px;
+  height: 731px;
+  margin: 20px auto;
+  background-color: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* 작은 Android 화면 (360x640) 대응 */
+@media (max-width: 411px) {
+  .app-container {
+    width: 360px;
+    height: 640px;
+    margin: 10px auto;
+    border-radius: 15px;
+  }
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 커스텀 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Safe area 패딩 (iPhone X 이상) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 버튼 hover 효과 */
+button {
+  transition: all 0.3s ease;
+}
+
+/* 입력 필드 포커스 효과 */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+/* 그라데이션 배경 */
+.bg-gradient-main {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 그림자 효과 */
+.shadow-soft {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+/* iOS 스타일 스위치 */
+.ios-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.ios-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.ios-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e4e4e4;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.ios-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .ios-switch-slider {
+  background-color: #34c759;
+}
+
+input:checked + .ios-switch-slider:before {
+  transform: translateX(22px);
+}
+
 @layer base {
   body {
     font-family: 'Noto Sans KR', sans-serif;
@@ -36,10 +387,6 @@ body {
 }
 
 @layer components {
-  .app-container {
-    @apply relative w-full max-w-[411px] h-[731px] mx-auto my-5 bg-white rounded-[20px] overflow-hidden shadow-xl;
-  }
-  
   .mobile-container {
     @apply relative w-full h-screen max-h-screen bg-white overflow-hidden;
   }

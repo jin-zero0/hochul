@@ -190,25 +190,63 @@ export default function HomePage() {
       />
       
       <AppLayout title="민간구급차 호출" showBack={false}>
-        <div className="space-y-3 p-3">
+        <div style={{ height: 'calc(100% - 60px - 80px)', overflowY: 'auto' }}>
           {/* 지도 영역 */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden h-40 relative">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '15px',
+            margin: '12px',
+            overflow: 'hidden',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+            border: '1px solid #f0f0f0',
+            height: '160px',
+            position: 'relative'
+          }}>
             <div id="map" className="w-full h-full" />
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <MapPin 
-                size={32} 
-                className="text-red-500 drop-shadow-lg" 
-                fill="currentColor"
-              />
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              color: '#ff3b30',
+              fontSize: '32px',
+              zIndex: 2,
+              pointerEvents: 'none',
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+            }}>
+              <MapPin size={32} fill="currentColor" />
             </div>
           </div>
 
           {/* 액션 버튼들 */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-3">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '15px',
+            padding: '12px',
+            margin: '12px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+            border: '1px solid #f0f0f0'
+          }}>
             <div className="flex gap-3">
               <button
                 onClick={handleEmergencyCall}
-                className="flex-1 bg-gradient-to-br from-red-500 via-red-500 to-red-600 text-white py-4 px-4 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                style={{
+                  flex: 1,
+                  background: 'linear-gradient(135deg, #ff3b30, #ff6b5a)',
+                  color: 'white',
+                  padding: '16px 18px',
+                  borderRadius: '15px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  border: 'none',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }}
               >
                 <Phone size={18} />
                 긴급호출
@@ -216,7 +254,23 @@ export default function HomePage() {
               
               <button
                 onClick={handleReservation}
-                className="flex-1 bg-gradient-to-br from-blue-500 via-blue-500 to-blue-600 text-white py-4 px-4 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                style={{
+                  flex: 1,
+                  background: 'linear-gradient(135deg, #007aff, #4da6ff)',
+                  color: 'white',
+                  padding: '16px 18px',
+                  borderRadius: '15px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  border: 'none',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }}
               >
                 <Calendar size={18} />
                 예약하기
@@ -224,7 +278,23 @@ export default function HomePage() {
               
               <button
                 onClick={handleNearbyHospital}
-                className="flex-1 bg-gradient-to-br from-green-500 via-green-500 to-green-600 text-white py-4 px-4 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                style={{
+                  flex: 1,
+                  background: 'linear-gradient(135deg, #34c759, #5ed75e)',
+                  color: 'white',
+                  padding: '16px 18px',
+                  borderRadius: '15px',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  border: 'none',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }}
               >
                 <Heart size={18} />
                 주변병원
@@ -233,11 +303,36 @@ export default function HomePage() {
           </div>
 
           {/* 위치 검색 */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-4">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '15px',
+            padding: '16px',
+            margin: '12px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+            border: '1px solid #f0f0f0'
+          }}>
             <div className="space-y-3">
               {/* 출발지 입력 */}
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+              <div style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '14px'
+              }}>
+                <div style={{
+                  width: '35px',
+                  height: '35px',
+                  borderRadius: '50%',
+                  backgroundColor: '#4caf50',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '15px',
+                  flexShrink: 0,
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}>
                   출
                 </div>
                 <div className="flex-1 relative">
@@ -249,7 +344,18 @@ export default function HomePage() {
                     onFocus={() => startLocation && setShowStartResults(true)}
                     onBlur={() => setTimeout(() => setShowStartResults(false), 200)}
                     placeholder="출발지를 입력하세요"
-                    className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-50 transition-all font-medium"
+                    style={{
+                      width: '100%',
+                      padding: '14px 36px 14px 16px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      backgroundColor: '#ffffff',
+                      transition: 'all 0.3s ease',
+                      color: '#333',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                    }}
                   />
                   {startLocation && (
                     <button
@@ -257,7 +363,18 @@ export default function HomePage() {
                         setStartLocation('');
                         setShowStartResults(false);
                       }}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: '#999',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                        transition: 'color 0.2s ease'
+                      }}
                     >
                       <X size={18} />
                     </button>
@@ -265,15 +382,43 @@ export default function HomePage() {
                   
                   {/* 검색 결과 */}
                   {showStartResults && searchResults.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 max-h-48 overflow-y-auto z-10">
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      width: '100%',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      backgroundColor: '#fff',
+                      borderRadius: '0 0 10px 10px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+                      zIndex: 20,
+                      border: '1px solid #f0f0f0',
+                      borderTop: 'none'
+                    }}>
                       {searchResults.map((result, index) => (
                         <div
                           key={index}
                           onClick={() => selectLocation(result, 'start')}
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-b-0"
+                          style={{
+                            padding: '12px 15px',
+                            borderBottom: '1px solid #f5f5f5',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
-                          <div className="font-semibold text-gray-800 text-sm">{result.name}</div>
-                          <div className="text-xs text-gray-500 mt-0.5">{result.address}</div>
+                          <div style={{
+                            fontWeight: '600',
+                            marginBottom: '3px',
+                            color: '#333',
+                            fontSize: '14px'
+                          }}>{result.name}</div>
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#666'
+                          }}>{result.address}</div>
                         </div>
                       ))}
                     </div>
@@ -282,19 +427,70 @@ export default function HomePage() {
               </div>
 
               {/* 위치 교환 버튼 */}
-              <div className="flex items-center justify-center relative">
-                <div className="absolute left-[18px] w-0.5 h-5 bg-gradient-to-b from-green-500 to-red-500"></div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                margin: '10px 0',
+                paddingLeft: '45px'
+              }}>
+                <div style={{
+                  width: '2px',
+                  height: '20px',
+                  background: 'linear-gradient(to bottom, #4caf50, #f44336)',
+                  marginRight: '15px'
+                }}></div>
                 <button
                   onClick={swapLocations}
-                  className="w-9 h-9 bg-white border-2 border-gray-200 rounded-full flex items-center justify-center hover:border-red-400 hover:bg-red-50 transition-all duration-300 transform hover:rotate-180"
+                  style={{
+                    backgroundColor: '#fff',
+                    border: '2px solid #f0f0f0',
+                    borderRadius: '50%',
+                    width: '35px',
+                    height: '35px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    color: '#666'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#ff3b30';
+                    e.currentTarget.style.color = '#ff3b30';
+                    e.currentTarget.style.transform = 'rotate(180deg)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#f0f0f0';
+                    e.currentTarget.style.color = '#666';
+                    e.currentTarget.style.transform = 'rotate(0deg)';
+                  }}
                 >
-                  <Navigation size={16} className="text-gray-600" />
+                  <Navigation size={16} />
                 </button>
               </div>
 
               {/* 도착지 입력 */}
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+              <div style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: '35px',
+                  height: '35px',
+                  borderRadius: '50%',
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '15px',
+                  flexShrink: 0,
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}>
                   도
                 </div>
                 <div className="flex-1 relative">
@@ -306,7 +502,18 @@ export default function HomePage() {
                     onFocus={() => endLocation && setShowEndResults(true)}
                     onBlur={() => setTimeout(() => setShowEndResults(false), 200)}
                     placeholder="도착지를 입력하세요"
-                    className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-50 transition-all font-medium"
+                    style={{
+                      width: '100%',
+                      padding: '14px 36px 14px 16px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '12px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      backgroundColor: '#ffffff',
+                      transition: 'all 0.3s ease',
+                      color: '#333',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                    }}
                   />
                   {endLocation && (
                     <button
@@ -314,7 +521,18 @@ export default function HomePage() {
                         setEndLocation('');
                         setShowEndResults(false);
                       }}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: '#999',
+                        fontSize: '14px',
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                        transition: 'color 0.2s ease'
+                      }}
                     >
                       <X size={18} />
                     </button>
@@ -322,15 +540,43 @@ export default function HomePage() {
                   
                   {/* 검색 결과 */}
                   {showEndResults && searchResults.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-gray-100 max-h-48 overflow-y-auto z-10">
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      width: '100%',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      backgroundColor: '#fff',
+                      borderRadius: '0 0 10px 10px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.15)',
+                      zIndex: 20,
+                      border: '1px solid #f0f0f0',
+                      borderTop: 'none'
+                    }}>
                       {searchResults.map((result, index) => (
                         <div
                           key={index}
                           onClick={() => selectLocation(result, 'end')}
-                          className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-b-0"
+                          style={{
+                            padding: '12px 15px',
+                            borderBottom: '1px solid #f5f5f5',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s ease'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
-                          <div className="font-semibold text-gray-800 text-sm">{result.name}</div>
-                          <div className="text-xs text-gray-500 mt-0.5">{result.address}</div>
+                          <div style={{
+                            fontWeight: '600',
+                            marginBottom: '3px',
+                            color: '#333',
+                            fontSize: '14px'
+                          }}>{result.name}</div>
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#666'
+                          }}>{result.address}</div>
                         </div>
                       ))}
                     </div>
@@ -341,7 +587,14 @@ export default function HomePage() {
           </div>
 
           {/* 광고 배너 */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-3">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '15px',
+            padding: '12px',
+            margin: '12px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+            border: '1px solid #f0f0f0'
+          }}>
             <div className="relative h-[70px] overflow-hidden">
               {ads.map((ad, index) => (
                 <div
@@ -354,7 +607,15 @@ export default function HomePage() {
                       : 'opacity-0 transform translate-x-full'
                   }`}
                 >
-                  <div className="bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-3 flex items-center h-[70px]">
+                  <div style={{
+                    background: 'linear-gradient(135deg, #f8f9fa, #ffffff)',
+                    borderRadius: '12px',
+                    padding: '12px 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    border: '1px solid #f0f0f0',
+                    height: '70px'
+                  }}>
                     <div className={`w-10 h-10 ${ad.iconBg} rounded-xl flex items-center justify-center text-white text-lg mr-3 shrink-0`}>
                       {ad.icon}
                     </div>
@@ -379,11 +640,15 @@ export default function HomePage() {
                 <button
                   key={index}
                   onClick={() => setCurrentAdIndex(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentAdIndex
-                      ? 'bg-red-500 w-4'
-                      : 'bg-gray-300 w-2 hover:bg-gray-400'
-                  }`}
+                  style={{
+                    width: index === currentAdIndex ? '16px' : '8px',
+                    height: '8px',
+                    borderRadius: '4px',
+                    backgroundColor: index === currentAdIndex ? '#ff3b30' : '#ddd',
+                    cursor: 'pointer',
+                    border: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
                 />
               ))}
             </div>

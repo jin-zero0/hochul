@@ -1,43 +1,22 @@
 'use client';
 
-import BottomNav from './BottomNav';
 import Header from './Header';
+import BottomNav from './BottomNav';
 
 interface AppLayoutProps {
   children: React.ReactNode;
   title: string;
-  showHeader?: boolean;
   showBack?: boolean;
-  showHelp?: boolean;
-  showBottomNav?: boolean;
-  onHelp?: () => void;
 }
 
-export default function AppLayout({
-  children,
-  title,
-  showHeader = true,
-  showBack = true,
-  showHelp = true,
-  showBottomNav = true,
-  onHelp
-}: AppLayoutProps) {
+export default function AppLayout({ children, title, showBack = true }: AppLayoutProps) {
   return (
-    <div className="app-container relative flex flex-col">
-      {showHeader && (
-        <Header
-          title={title}
-          showBack={showBack}
-          showHelp={showHelp}
-          onHelp={onHelp}
-        />
-      )}
-      
-      <div className="flex-1 overflow-y-auto custom-scrollbar pb-20">
+    <div className="app-container">
+      <Header title={title} showBack={showBack} />
+      <main className="relative h-[calc(100%-60px-80px)] overflow-y-auto bg-gray-50">
         {children}
-      </div>
-      
-      {showBottomNav && <BottomNav />}
+      </main>
+      <BottomNav />
     </div>
   );
 }
