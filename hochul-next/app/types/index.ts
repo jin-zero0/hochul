@@ -4,7 +4,7 @@ export interface User {
   name: string;
   phone: string;
   email?: string;
-  type: 'customer' | 'driver';
+  type: 'customer' | 'driver' | 'admin';
 }
 
 // 위치 정보

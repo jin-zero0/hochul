@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User, Phone, Mail, CreditCard, Bell, Shield, HelpCircle, LogOut, ChevronRight } from 'lucide-react';
 import AppLayout from '../components/AppLayout';
 import { getUser, logout } from '../utils/auth';
+import type { User as UserType } from '../types';
 
 interface MenuItem {
   icon: React.ReactNode;
@@ -16,7 +17,7 @@ interface MenuItem {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserType | null>(null);
 
   useEffect(() => {
     const userData = getUser();

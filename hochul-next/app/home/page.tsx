@@ -2,20 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Phone, Calendar, Heart, MapPin, Navigation, AlertCircle } from 'lucide-react';
+import { Phone, Calendar, Heart, MapPin, Navigation } from 'lucide-react';
 import AppLayout from '../components/AppLayout';
 import { getUser } from '../utils/auth';
 import Script from 'next/script';
 
+interface Ad {
+  icon: string;
+  iconBg: string;
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonBg: string;
+  action: () => void;
+}
+
 export default function HomePage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [map, setMap] = useState<any>(null);
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
 
-  const ads = [
+  const ads: Ad[] = [
     {
       icon: '🚨',
       iconBg: 'bg-red-500',
@@ -47,9 +55,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const userData = getUser();
-    if (userData) {
-      setUser(userData);
-    } else {
+    if (!userData) {
       router.push('/login');
     }
   }, [router]);
@@ -61,7 +67,8 @@ export default function HomePage() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [ads.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initializeMap = () => {
     if (window.kakao && window.kakao.maps) {
@@ -72,7 +79,6 @@ export default function HomePage() {
       };
       
       const mapInstance = new window.kakao.maps.Map(container, options);
-      setMap(mapInstance);
       
       // 현재 위치 가져오기
       if (navigator.geolocation) {
@@ -276,6 +282,22 @@ export default function HomePage() {
 // Window 타입 확장
 declare global {
   interface Window {
-    kakao: any;
+    kakao: {
+      maps: {
+        load: (callback: () => void) => void;
+        Map: new (container: HTMLElement | null, options: object) => KakaoMap;
+        LatLng: new (lat: number, lng: number) => KakaoLatLng;
+      };
+    };
   }
+}
+
+// Kakao Maps 타입 정의
+interface KakaoMap {
+  setCenter: (position: KakaoLatLng) => void;
+}
+
+interface KakaoLatLng {
+  lat: () => number;
+  lng: () => number;
 }
