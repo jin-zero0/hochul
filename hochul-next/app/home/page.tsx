@@ -2,15 +2,30 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Phone, Calendar, Heart, MapPin, Navigation, AlertCircle } from 'lucide-react';
+import { Phone, Calendar, Heart, MapPin, Navigation } from 'lucide-react';
 import AppLayout from '../components/AppLayout';
 import { getUser } from '../utils/auth';
 import Script from 'next/script';
 
+// Kakao Maps 타입 정의
+interface KakaoLatLng {
+  getLat(): number;
+  getLng(): number;
+}
+
+interface KakaoMap {
+  setCenter(position: KakaoLatLng): void;
+}
+
+interface KakaoMapOptions {
+  center: KakaoLatLng;
+  level: number;
+}
+
 export default function HomePage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [map, setMap] = useState<any>(null);
+  const [, setUser] = useState<ReturnType<typeof getUser>>(null);
+  const [, setMap] = useState<KakaoMap | null>(null);
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
@@ -66,7 +81,7 @@ export default function HomePage() {
   const initializeMap = () => {
     if (window.kakao && window.kakao.maps) {
       const container = document.getElementById('map');
-      const options = {
+      const options: KakaoMapOptions = {
         center: new window.kakao.maps.LatLng(37.5665, 126.9780),
         level: 3
       };
@@ -276,6 +291,12 @@ export default function HomePage() {
 // Window 타입 확장
 declare global {
   interface Window {
-    kakao: any;
+    kakao: {
+      maps: {
+        load: (callback: () => void) => void;
+        LatLng: new (lat: number, lng: number) => KakaoLatLng;
+        Map: new (container: HTMLElement | null, options: KakaoMapOptions) => KakaoMap;
+      };
+    };
   }
 }

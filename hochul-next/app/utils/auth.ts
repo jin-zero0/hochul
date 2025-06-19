@@ -8,6 +8,7 @@ export interface AuthData {
     id: string;
     name: string;
     phone: string;
+    email?: string;
     type: 'customer' | 'driver' | 'admin';
   };
   token?: string;

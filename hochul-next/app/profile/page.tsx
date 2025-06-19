@@ -16,7 +16,7 @@ interface MenuItem {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
 
   useEffect(() => {
     const userData = getUser();

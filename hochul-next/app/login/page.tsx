@@ -2,11 +2,22 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Truck, Heart, Settings, User } from 'lucide-react';
+import { Truck, Settings, User } from 'lucide-react';
 import { login } from '../utils/auth';
 import Script from 'next/script';
 
 type AppType = 'customer' | 'driver' | 'admin' | null;
+
+interface KakaoAuthResponse {
+  access_token: string;
+}
+
+interface KakaoUserResponse {
+  id: number;
+  properties?: {
+    nickname?: string;
+  };
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,12 +67,12 @@ export default function LoginPage() {
     
     if (window.Kakao && window.Kakao.Auth) {
       window.Kakao.Auth.login({
-        success: function(authObj: any) {
+        success: function(authObj: KakaoAuthResponse) {
           console.log('카카오 로그인 성공:', authObj);
           
           window.Kakao.API.request({
             url: '/v2/user/me',
-            success: function(res: any) {
+            success: function(res: KakaoUserResponse) {
               console.log('사용자 정보:', res);
               
               const userInfo = {
@@ -84,14 +95,14 @@ export default function LoginPage() {
                 }
               }, 1000);
             },
-            fail: function(error: any) {
+            fail: function(error: Error) {
               console.error('사용자 정보 가져오기 실패:', error);
               setIsLoading(false);
               alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
             }
           });
         },
-        fail: function(err: any) {
+        fail: function(err: Error) {
           console.error('카카오 로그인 실패:', err);
           setIsLoading(false);
           alert('로그인에 실패했습니다. 다시 시도해주세요.');
@@ -253,6 +264,22 @@ export default function LoginPage() {
 // Window 타입 확장
 declare global {
   interface Window {
-    Kakao: any;
+    Kakao: {
+      init: (key: string) => void;
+      isInitialized: () => boolean;
+      Auth: {
+        login: (settings: {
+          success: (response: KakaoAuthResponse) => void;
+          fail: (error: Error) => void;
+        }) => void;
+      };
+      API: {
+        request: (settings: {
+          url: string;
+          success: (response: KakaoUserResponse) => void;
+          fail: (error: Error) => void;
+        }) => void;
+      };
+    };
   }
 }
