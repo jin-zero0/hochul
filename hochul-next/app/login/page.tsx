@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Truck, Heart, Settings, User } from 'lucide-react';
-import { login } from '../utils/auth';
+import { Truck, Settings, User } from 'lucide-react';
+import { login, isAuthenticated } from '../utils/auth';
 import Script from 'next/script';
 
 type AppType = 'customer' | 'driver' | 'admin' | null;
@@ -12,6 +12,12 @@ export default function LoginPage() {
   const router = useRouter();
   const [selectedApp, setSelectedApp] = useState<AppType>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isOTPSent, setIsOTPSent] = useState(false);
+  const [timer, setTimer] = useState(180);
+  const [otpCode, setOtpCode] = useState('');
+  const otpInputs = useRef<HTMLInputElement[]>([]);
 
   const handleAppSelect = (appType: AppType) => {
     setSelectedApp(appType);
@@ -71,7 +77,7 @@ export default function LoginPage() {
                 type: selectedApp as 'customer' | 'driver'
               };
               
-              login(userInfo, authObj.access_token);
+              login(userInfo);
               
               setTimeout(() => {
                 setIsLoading(false);
@@ -102,6 +108,111 @@ export default function LoginPage() {
       alert('카카오 SDK 로딩에 실패했습니다. 페이지를 새로고침해주세요.');
     }
   };
+
+  const detectKakaoRedirect = () => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('access_token')) {
+      // 카카오 로그인 성공 처리
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      
+      if (accessToken) {
+        // 실제로는 백엔드 API를 통해 사용자 정보를 가져와야 함
+        const mockUser = {
+          id: 'kakao_user_1',
+          name: '카카오 사용자',
+          email: 'kakao@example.com',
+          phone: '010-0000-0000',
+          type: selectedApp as 'customer' | 'driver'
+        };
+        
+        login(mockUser);
+        router.push('/home');
+      }
+    }
+  };
+
+  const handleEmailLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!loginData.email || !loginData.password) {
+      alert('이메일과 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    const mockUser = {
+      id: '1',
+      name: '홍길동',
+      email: loginData.email,
+      phone: '010-1234-5678',
+      type: selectedApp as 'customer' | 'driver'
+    };
+
+    login(mockUser);
+    router.push('/home');
+  };
+
+  const handlePhoneLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!phoneNumber) {
+      alert('전화번호를 입력해주세요.');
+      return;
+    }
+
+    if (!isOTPSent) {
+      setIsOTPSent(true);
+      setTimer(180);
+      alert('인증번호가 발송되었습니다.');
+      return;
+    }
+
+    if (!otpCode || otpCode.length !== 6) {
+      alert('6자리 인증번호를 입력해주세요.');
+      return;
+    }
+
+    const mockUser = {
+      id: '2',
+      name: '김민수',
+      email: 'user@example.com',
+      phone: phoneNumber,
+      type: selectedApp as 'customer' | 'driver'
+    };
+
+    login(mockUser);
+    router.push('/home');
+  };
+
+  const handleOTPChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const value = e.target.value;
+    if (value.length <= 1 && /^\d*$/.test(value)) {
+      const newOTP = otpCode.split('');
+      newOTP[index] = value;
+      setOtpCode(newOTP.join(''));
+      
+      // 자동으로 다음 입력칸으로 이동
+      if (value && index < 5) {
+        const nextInput = otpInputs.current[index + 1];
+        if (nextInput) {
+          nextInput.focus();
+        }
+      }
+    }
+  };
+
+  const handleOTPKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === 'Backspace' && !e.currentTarget.value && index > 0) {
+      const prevInput = otpInputs.current[index - 1];
+      if (prevInput) {
+        prevInput.focus();
+      }
+    }
+  };
+
+  useEffect(() => {
+    detectKakaoRedirect();
+  }, [router]);
 
   return (
     <>
@@ -163,7 +274,7 @@ export default function LoginPage() {
                           : 'border-gray-200 bg-white text-gray-600 hover:border-green-300'
                       }`}
                     >
-                      <Settings size={24} className="mx-auto mb-2" />
+                      <User size={24} className="mx-auto mb-2" />
                       <span className="text-sm font-semibold">운영자</span>
                     </button>
                   </div>

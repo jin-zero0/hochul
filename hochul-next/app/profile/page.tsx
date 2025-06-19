@@ -2,21 +2,37 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Phone, Mail, CreditCard, Bell, Shield, HelpCircle, LogOut, ChevronRight } from 'lucide-react';
+import { User, Bell, CreditCard, Heart, Hospital, HelpCircle, Phone as PhoneIcon, FileText, Shield, Info, ChevronRight, Edit2 } from 'lucide-react';
 import AppLayout from '../components/AppLayout';
 import { getUser, logout } from '../utils/auth';
+
+interface UserData {
+  id?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  type?: 'customer' | 'driver' | 'admin';
+}
 
 interface MenuItem {
   icon: React.ReactNode;
   title: string;
-  description?: string;
-  action: () => void;
-  color: string;
+  value?: string;
+  iconColor: string;
+  hasToggle?: boolean;
+  toggleValue?: boolean;
+  action?: () => void;
+}
+
+interface MenuSection {
+  title: string;
+  items: MenuItem[];
 }
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserData | null>(null);
+  const [notificationEnabled, setNotificationEnabled] = useState(true);
 
   useEffect(() => {
     const userData = getUser();
@@ -28,52 +44,84 @@ export default function ProfilePage() {
   }, [router]);
 
   const handleLogout = () => {
-    if (confirm('로그아웃 하시겠습니까?')) {
+    if (confirm('정말 로그아웃 하시겠습니까?')) {
       logout();
       router.push('/login');
     }
   };
 
-  const menuItems: MenuItem[] = [
+  const menuSections: MenuSection[] = [
     {
-      icon: <User size={20} />,
-      title: '개인정보 수정',
-      description: '이름, 연락처 등 수정',
-      action: () => alert('개인정보 수정 기능은 준비 중입니다.'),
-      color: 'text-blue-500'
+      title: '계정 설정',
+      items: [
+        {
+          icon: <User size={16} />,
+          title: '개인정보 관리',
+          iconColor: 'bg-blue-100 text-blue-600',
+          action: () => alert('개인정보 관리 페이지로 이동합니다.')
+        },
+        {
+          icon: <Bell size={16} />,
+          title: '알림 설정',
+          iconColor: 'bg-green-100 text-green-600',
+          hasToggle: true,
+          toggleValue: notificationEnabled
+        },
+        {
+          icon: <CreditCard size={16} />,
+          title: '결제 수단 관리',
+          iconColor: 'bg-purple-100 text-purple-600',
+          action: () => alert('결제 수단 관리 페이지로 이동합니다.')
+        }
+      ]
     },
     {
-      icon: <CreditCard size={20} />,
-      title: '결제 수단 관리',
-      description: '카드, 계좌 등록',
-      action: () => alert('결제 수단 관리 기능은 준비 중입니다.'),
-      color: 'text-green-500'
+      title: '의료 정보',
+      items: [
+        {
+          icon: <Heart size={16} />,
+          title: '기본 의료 정보',
+          iconColor: 'bg-red-100 text-red-600',
+          action: () => alert('기본 의료 정보 페이지로 이동합니다.')
+        },
+        {
+          icon: <Hospital size={16} />,
+          title: '자주 가는 병원',
+          value: '2개 등록됨',
+          iconColor: 'bg-orange-100 text-orange-600',
+          action: () => alert('자주 가는 병원 페이지로 이동합니다.')
+        }
+      ]
     },
     {
-      icon: <Bell size={20} />,
-      title: '알림 설정',
-      description: '푸시, 문자 알림',
-      action: () => alert('알림 설정 기능은 준비 중입니다.'),
-      color: 'text-yellow-500'
-    },
-    {
-      icon: <Shield size={20} />,
-      title: '개인정보 처리방침',
-      action: () => alert('개인정보 처리방침 페이지로 이동합니다.'),
-      color: 'text-purple-500'
-    },
-    {
-      icon: <HelpCircle size={20} />,
-      title: '고객센터',
-      description: '1588-0000',
-      action: () => window.location.href = 'tel:15880000',
-      color: 'text-orange-500'
-    },
-    {
-      icon: <LogOut size={20} />,
-      title: '로그아웃',
-      action: handleLogout,
-      color: 'text-red-500'
+      title: '고객지원',
+      items: [
+        {
+          icon: <HelpCircle size={16} />,
+          title: '자주 묻는 질문',
+          iconColor: 'bg-blue-100 text-blue-600',
+          action: () => alert('자주 묻는 질문 페이지로 이동합니다.')
+        },
+        {
+          icon: <PhoneIcon size={16} />,
+          title: '고객센터',
+          value: '1588-1234',
+          iconColor: 'bg-blue-100 text-blue-600',
+          action: () => window.location.href = 'tel:15881234'
+        },
+        {
+          icon: <FileText size={16} />,
+          title: '이용약관',
+          iconColor: 'bg-blue-100 text-blue-600',
+          action: () => alert('이용약관 페이지로 이동합니다.')
+        },
+        {
+          icon: <Shield size={16} />,
+          title: '개인정보 처리방침',
+          iconColor: 'bg-blue-100 text-blue-600',
+          action: () => alert('개인정보 처리방침 페이지로 이동합니다.')
+        }
+      ]
     }
   ];
 
@@ -89,87 +137,91 @@ export default function ProfilePage() {
 
   return (
     <AppLayout title="프로필">
-      <div className="p-4">
-        {/* 프로필 카드 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-red-400 to-red-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {user.name?.[0] || 'U'}
+      <div className="bg-gray-50 min-h-screen">
+        {/* 프로필 섹션 */}
+        <div className="bg-white p-5 mb-4">
+          <div className="flex items-center">
+            <div className="w-[70px] h-[70px] bg-gray-100 rounded-full flex items-center justify-center mr-4">
+              <User size={36} className="text-gray-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-800 mb-1">{user.name || '사용자'}</h2>
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                <Phone size={14} />
-                {user.phone || '전화번호 없음'}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Mail size={14} />
-                {user.email || '이메일 없음'}
-              </div>
+              <h2 className="text-lg font-semibold text-gray-800">{user.name || '홍길동'}</h2>
+              <p className="text-sm text-gray-500">{user.phone || '010-1234-5678'}</p>
+            </div>
+            <button
+              onClick={() => alert('프로필 수정 페이지로 이동합니다.')}
+              className="flex items-center gap-1 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700"
+            >
+              <Edit2 size={14} />
+              수정
+            </button>
+          </div>
+        </div>
+
+        {/* 메뉴 섹션들 */}
+        {menuSections.map((section, sectionIndex) => (
+          <div key={sectionIndex} className="bg-white mb-4">
+            <h3 className="px-5 pt-4 pb-3 text-sm font-medium text-gray-700">{section.title}</h3>
+            <div>
+              {section.items.map((item, itemIndex) => (
+                <div
+                  key={itemIndex}
+                  onClick={item.action}
+                  className={`flex items-center px-5 py-4 ${
+                    itemIndex < section.items.length - 1 ? 'border-b border-gray-100' : ''
+                  } ${item.action ? 'cursor-pointer active:bg-gray-50' : ''}`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 ${item.iconColor}`}>
+                    {item.icon}
+                  </div>
+                  <div className="flex-1 flex items-center justify-between">
+                    <span className="text-gray-800">{item.title}</span>
+                    {item.hasToggle ? (
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={notificationEnabled}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setNotificationEnabled(!notificationEnabled);
+                          }}
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                      </label>
+                    ) : item.value ? (
+                      <span className="text-sm text-gray-500">{item.value}</span>
+                    ) : (
+                      <ChevronRight size={16} className="text-gray-400" />
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          
-          {/* 회원 유형 배지 */}
-          <div className="mt-4 flex items-center gap-2">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-              user.type === 'customer' 
-                ? 'bg-blue-100 text-blue-800'
-                : user.type === 'driver'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-purple-100 text-purple-800'
-            }`}>
-              {user.type === 'customer' ? '일반 회원' : user.type === 'driver' ? '기사 회원' : '관리자'}
-            </span>
-            <span className="text-xs text-gray-500">
-              가입일: {new Date().toLocaleDateString()}
-            </span>
+        ))}
+
+        {/* 앱 정보 */}
+        <div className="bg-white mb-4">
+          <div className="flex items-center px-5 py-4">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
+              <Info size={16} />
+            </div>
+            <div className="flex-1 flex items-center justify-between">
+              <span className="text-gray-800">앱 버전</span>
+              <span className="text-sm text-gray-500">1.0.0</span>
+            </div>
           </div>
         </div>
 
-        {/* 이용 통계 */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="bg-white rounded-xl p-4 text-center border border-gray-100">
-            <div className="text-2xl font-bold text-red-500">0</div>
-            <div className="text-xs text-gray-600 mt-1">이용 횟수</div>
-          </div>
-          <div className="bg-white rounded-xl p-4 text-center border border-gray-100">
-            <div className="text-2xl font-bold text-blue-500">0</div>
-            <div className="text-xs text-gray-600 mt-1">예약 건수</div>
-          </div>
-          <div className="bg-white rounded-xl p-4 text-center border border-gray-100">
-            <div className="text-2xl font-bold text-green-500">0</div>
-            <div className="text-xs text-gray-600 mt-1">쿠폰/포인트</div>
-          </div>
-        </div>
-
-        {/* 메뉴 리스트 */}
-        <div className="space-y-2">
-          {menuItems.map((item, index) => (
-            <button
-              key={index}
-              onClick={item.action}
-              className="w-full bg-white rounded-xl p-4 flex items-center justify-between hover:bg-gray-50 transition-colors border border-gray-100"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`${item.color}`}>
-                  {item.icon}
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold text-gray-800">{item.title}</div>
-                  {item.description && (
-                    <div className="text-xs text-gray-500">{item.description}</div>
-                  )}
-                </div>
-              </div>
-              <ChevronRight size={18} className="text-gray-400" />
-            </button>
-          ))}
-        </div>
-
-        {/* 버전 정보 */}
-        <div className="mt-8 text-center text-xs text-gray-400">
-          <p>호출 v1.0.0</p>
-          <p>© 2024 민간구급차 플랫폼</p>
+        {/* 로그아웃 */}
+        <div className="bg-white">
+          <button
+            onClick={handleLogout}
+            className="w-full py-4 text-red-500 font-medium text-center"
+          >
+            로그아웃
+          </button>
         </div>
       </div>
     </AppLayout>
