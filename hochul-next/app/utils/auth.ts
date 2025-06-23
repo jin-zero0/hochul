@@ -1,6 +1,7 @@
 // 인증 관련 유틸리티 함수들
+import { APP_CONFIG } from '../constants';
 
-const AUTH_KEY = 'hochul_auth';
+const AUTH_KEY = APP_CONFIG.STORAGE_KEYS.AUTH;
 
 export interface AuthData {
   isLoggedIn: boolean;

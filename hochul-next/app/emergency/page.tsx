@@ -3,6 +3,28 @@
 import { useRouter } from 'next/navigation';
 import { Activity, Droplet, Flame, Wind, Bone, Sun, Phone } from 'lucide-react';
 import AppLayout from '../components/AppLayout';
+import ErrorBoundary from '../components/ErrorBoundary';
+import { EMERGENCY_TYPES, APP_CONFIG } from '../constants';
+
+// 아이콘 매핑
+const iconMap = {
+  red: Activity,
+  pink: Droplet,
+  orange: Flame,
+  blue: Wind,
+  purple: Bone,
+  yellow: Sun,
+} as const;
+
+// 색상 매핑
+const colorMap = {
+  red: 'bg-red-500',
+  pink: 'bg-pink-500',
+  orange: 'bg-orange-500',
+  blue: 'bg-blue-500',
+  purple: 'bg-purple-500',
+  yellow: 'bg-yellow-500',
+} as const;
 
 interface EmergencyItem {
   id: string;
@@ -16,70 +38,30 @@ interface EmergencyItem {
 export default function EmergencyPage() {
   const router = useRouter();
   
-  const emergencyItems: EmergencyItem[] = [
-    {
-      id: 'cpr',
-      title: '심폐소생술 (CPR)',
-      description: '의식이 없고 호흡이 없을 때',
-      icon: <Activity size={28} />,
-      bgColor: 'bg-red-500',
-      route: '/emergency/cpr'
-    },
-    {
-      id: 'bleeding',
-      title: '출혈/지혈',
-      description: '심한 출혈이 발생했을 때',
-      icon: <Droplet size={28} />,
-      bgColor: 'bg-pink-500',
-      route: '/emergency/bleeding'
-    },
-    {
-      id: 'burn',
-      title: '화상',
-      description: '화상을 입었을 때',
-      icon: <Flame size={28} />,
-      bgColor: 'bg-orange-500',
-      route: '/emergency/burn'
-    },
-    {
-      id: 'choking',
-      title: '기도 폐쇄',
-      description: '음식물 등으로 숨을 못 쉴 때',
-      icon: <Wind size={28} />,
-      bgColor: 'bg-blue-500',
-      route: '/emergency/choking'
-    },
-    {
-      id: 'fracture',
-      title: '골절',
-      description: '뼈가 부러졌을 때',
-      icon: <Bone size={28} />,
-      bgColor: 'bg-purple-500',
-      route: '/emergency/fracture'
-    },
-    {
-      id: 'heat',
-      title: '온열질환',
-      description: '열사병, 일사병 등',
-      icon: <Sun size={28} />,
-      bgColor: 'bg-yellow-500',
-      route: '/emergency/heat'
-    }
-  ];
+  // 상수를 사용하여 응급상황 아이템 생성
+  const emergencyItems: EmergencyItem[] = EMERGENCY_TYPES.map(item => {
+    const IconComponent = iconMap[item.color as keyof typeof iconMap];
+    return {
+      ...item,
+      icon: <IconComponent size={28} />,
+      bgColor: colorMap[item.color as keyof typeof colorMap],
+    };
+  });
 
   const handleEmergencySelect = (route: string) => {
     router.push(route);
   };
 
   const handleEmergencyCall = () => {
-    if (confirm('119에 전화하시겠습니까?')) {
-      window.location.href = 'tel:119';
+    if (confirm(`${APP_CONFIG.EMERGENCY_PHONE}에 전화하시겠습니까?`)) {
+      window.location.href = `tel:${APP_CONFIG.EMERGENCY_PHONE}`;
     }
   };
 
   return (
     <AppLayout title="응급처치 가이드">
-      <div className="p-4">
+      <ErrorBoundary>
+        <div className="p-4">
         {/* 긴급 연락 버튼 */}
         <div className="mb-4">
           <button
@@ -87,10 +69,10 @@ export default function EmergencyPage() {
             className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-4 px-6 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all"
           >
             <Phone size={24} />
-            119 긴급전화
+{APP_CONFIG.EMERGENCY_PHONE} 긴급전화
           </button>
           <p className="text-center text-sm text-gray-600 mt-2">
-            생명이 위급한 상황에서는 즉시 119에 신고하세요
+생명이 위급한 상황에서는 즉시 {APP_CONFIG.EMERGENCY_PHONE}에 신고하세요
           </p>
         </div>
 
@@ -128,7 +110,8 @@ export default function EmergencyPage() {
             <li>• 지시에 따라 응급처치를 시행하세요</li>
           </ul>
         </div>
-      </div>
+        </div>
+      </ErrorBoundary>
     </AppLayout>
   );
 }

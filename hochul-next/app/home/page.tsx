@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Phone, Calendar, Heart, MapPin, Navigation, AlertCircle } from 'lucide-react';
 import AppLayout from '../components/AppLayout';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { getUser } from '../utils/auth';
+import { APP_CONFIG } from '../constants';
 import Script from 'next/script';
 
 export default function HomePage() {
@@ -58,7 +60,7 @@ export default function HomePage() {
     // 광고 슬라이더 자동 전환
     const interval = setInterval(() => {
       setCurrentAdIndex((prev) => (prev + 1) % ads.length);
-    }, 3000);
+    }, APP_CONFIG.ANIMATION.AD_SLIDE_INTERVAL);
 
     return () => clearInterval(interval);
   }, [ads.length]);
@@ -67,8 +69,11 @@ export default function HomePage() {
     if (window.kakao && window.kakao.maps) {
       const container = document.getElementById('map');
       const options = {
-        center: new window.kakao.maps.LatLng(37.5665, 126.9780),
-        level: 3
+        center: new window.kakao.maps.LatLng(
+          APP_CONFIG.MAP.DEFAULT_LAT,
+          APP_CONFIG.MAP.DEFAULT_LNG
+        ),
+        level: APP_CONFIG.MAP.DEFAULT_ZOOM
       };
       
       const mapInstance = new window.kakao.maps.Map(container, options);
@@ -110,7 +115,7 @@ export default function HomePage() {
   return (
     <>
       <Script
-        src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ae9cce23e8367af0be888d1657d525e7&autoload=false"
+        src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${APP_CONFIG.KAKAO.APP_KEY}&autoload=false`}
         strategy="afterInteractive"
         onLoad={() => {
           window.kakao.maps.load(() => {
@@ -119,7 +124,8 @@ export default function HomePage() {
         }}
       />
       
-      <AppLayout title="민간구급차 호출" showBack={false}>
+      <AppLayout title={APP_CONFIG.APP_NAME} showBack={false}>
+        <ErrorBoundary>
         <div className="space-y-3 p-3">
           {/* 지도 영역 */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-40 relative">
@@ -268,6 +274,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+        </ErrorBoundary>
       </AppLayout>
     </>
   );

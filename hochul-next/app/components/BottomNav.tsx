@@ -3,6 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Calendar, Clock, User, HeartHandshake } from 'lucide-react';
+import { NAV_ITEMS } from '../constants';
+
+// 아이콘 매핑
+const iconMap = {
+  Home: Home,
+  Calendar: Calendar,
+  HeartHandshake: HeartHandshake,
+  Clock: Clock,
+  User: User,
+} as const;
 
 interface NavItem {
   href: string;
@@ -10,33 +20,15 @@ interface NavItem {
   label: string;
 }
 
-const navItems: NavItem[] = [
-  {
-    href: '/home',
-    icon: <Home size={20} />,
-    label: '홈'
-  },
-  {
-    href: '/reservation',
-    icon: <Calendar size={20} />,
-    label: '예약'
-  },
-  {
-    href: '/emergency',
-    icon: <HeartHandshake size={20} />,
-    label: '응급'
-  },
-  {
-    href: '/history',
-    icon: <Clock size={20} />,
-    label: '이력'
-  },
-  {
-    href: '/profile',
-    icon: <User size={20} />,
-    label: '프로필'
-  }
-];
+// 상수를 사용하여 네비게이션 아이템 생성
+const navItems: NavItem[] = NAV_ITEMS.map(item => {
+  const IconComponent = iconMap[item.icon as keyof typeof iconMap];
+  return {
+    href: item.href,
+    icon: <IconComponent size={20} />,
+    label: item.label,
+  };
+});
 
 export default function BottomNav() {
   const pathname = usePathname();
